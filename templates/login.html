@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Log In - iDOC{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <!-- Left side - Login form -->
+    <div class="auth-form-side">
+        <div class="brand-logo">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-file-earmark-text" viewBox="0 0 16 16">
+                <path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1zM5 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5"/>
+                <path d="M9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.5zm0 1v2A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z"/>
+            </svg>
+            <span><span class="text-primary">i</span>DOC</span>
+        </div>
+        
+        <div class="auth-form">
+            <div class="form-header">
+                <h1 class="form-title">欢迎使用iDOC平台</h1>
+                <p class="form-subtitle">MVP演示版本 - 体验AI驱动的智能文档处理</p>
+                <div class="alert alert-primary mt-3">
+                    <div class="d-flex align-items-center mb-2">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" class="me-2">
+                            <path d="M10 2L12.3 6.8L18 6.8L13.7 10L16 15L10 12.2L4 15L6.3 10L2 6.8L7.7 6.8L10 2Z" fill="#0066CC"/>
+                        </svg>
+                        <strong>客户演示账户</strong>
+                    </div>
+                    <div class="mb-1"><strong>邮箱:</strong> demo@example.com</div>
+                    <div class="mb-2"><strong>密码:</strong> Password123</div>
+                    <small class="text-muted">立即体验AI分析、智能对话、知识库管理等核心功能</small>
+                </div>
+            </div>
+            
+            <form method="POST" action="{{ url_for('login', next=url_for('dashboard')) }}" id="login-form">
+                <div class="form-group">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                    <div class="invalid-feedback"></div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label for="password" class="form-label mb-0">Password</label>
+                        <a href="#" class="small text-primary">Forgot password?</a>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="password" name="password" required>
+                        <button class="btn btn-outline-secondary password-toggle" type="button" data-target="#password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="invalid-feedback"></div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="remember" name="remember">
+                        <label class="form-check-label" for="remember">
+                            Remember me
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary btn-block" data-loading-text="Signing in...">
+                        Sign In
+                    </button>
+                </div>
+            </form>
+            
+            <div class="social-login">
+                <div class="social-login-title">
+                    <span>or continue with</span>
+                </div>
+                
+                <div class="social-buttons">
+                    <a href="{{ url_for('oauth_login', provider='google') }}" class="social-button google-button shadow-md hover:shadow-lg">
+                        <i class="fab fa-google"></i> Google
+                    </a>
+                    <a href="{{ url_for('oauth_login', provider='apple') }}" class="social-button apple-button shadow-md hover:shadow-lg">
+                        <i class="fab fa-apple"></i> Apple
+                    </a>
+                    <a href="{{ url_for('oauth_login', provider='facebook') }}" class="social-button facebook-button shadow-md hover:shadow-lg">
+                        <i class="fab fa-facebook-f"></i> Facebook
+                    </a>
+                    <a href="{{ url_for('oauth_login', provider='twitter') }}" class="social-button twitter-button shadow-md hover:shadow-lg">
+                        <i class="fab fa-twitter"></i> X
+                    </a>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <p>Don't have an account? <a href="{{ url_for('register') }}" class="text-primary">Sign up</a></p>
+            </div>
+        </div>
+        
+        <div class="auth-footer">
+            <p>&copy; 2025 iDOC. All rights reserved.</p>
+        </div>
+    </div>
+    
+    <!-- Right side - Marketing content -->
+    <div class="auth-marketing-side">
+        <div class="marketing-content">
+            <h2 class="marketing-title">Unlock the power of your documents</h2>
+            
+            <div class="marketing-feature">
+                <div class="marketing-icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div>
+                    <h3 class="marketing-feature-title">AI-powered Document Intelligence</h3>
+                    <p class="marketing-feature-text">Our advanced AI technology automatically extracts, classifies, and organizes information from any document.</p>
+                </div>
+            </div>
+            
+            <div class="marketing-feature">
+                <div class="marketing-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <div>
+                    <h3 class="marketing-feature-title">Extract Key Data in Seconds, Not Hours</h3>
+                    <p class="marketing-feature-text">Save valuable time by automating manual data extraction tasks with superior accuracy.</p>
+                </div>
+            </div>
+            
+            <div class="marketing-feature">
+                <div class="marketing-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div>
+                    <h3 class="marketing-feature-title">Enterprise-grade Security & Compliance</h3>
+                    <p class="marketing-feature-text">Rest easy knowing your sensitive documents are protected with bank-level security and compliance standards.</p>
+                </div>
+            </div>
+            
+            <div class="marketing-feature">
+                <div class="marketing-icon">
+                    <i class="fas fa-plug"></i>
+                </div>
+                <div>
+                    <h3 class="marketing-feature-title">Seamless No-Code Integration for Any Workflow</h3>
+                    <p class="marketing-feature-text">Connect with your existing tools and automate your document workflows without writing a single line of code.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

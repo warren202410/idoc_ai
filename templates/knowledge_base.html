@@ -1,0 +1,1193 @@
+{% extends "base.html" %}
+
+{% block title %}企业知识库 - iDOC{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<style>
+    .knowledge-base-container {
+        padding: 2rem;
+    }
+    
+    .kb-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    
+    .kb-title {
+        font-size: 1.75rem;
+        font-weight: 600;
+        margin: 0;
+        color: #1e293b;
+    }
+    
+    .kb-actions {
+        display: flex;
+        gap: 0.75rem;
+    }
+    
+    .btn-primary {
+        background-color: #4A6CF7;
+        border-color: #4A6CF7;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-primary:hover {
+        background-color: #3a5ad1;
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-outline {
+        background-color: transparent;
+        border: 1px solid #e5e9f2;
+        color: #64748b;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-outline:hover {
+        background-color: #f8fafc;
+        border-color: #4A6CF7;
+        color: #4A6CF7;
+        text-decoration: none;
+    }
+    
+    .kb-filters {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        background-color: white;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    
+    .kb-search {
+        flex: 1;
+        position: relative;
+    }
+    
+    .kb-search input {
+        width: 100%;
+        padding: 0.5rem 1rem 0.5rem 2.5rem;
+        border: 1px solid #e5e9f2;
+        border-radius: 6px;
+        outline: none;
+        transition: border-color 0.2s ease;
+    }
+    
+    .kb-search input:focus {
+        border-color: #4A6CF7;
+        box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.1);
+    }
+    
+    .kb-search-icon {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+    }
+    
+    .kb-filter-group {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .kb-filter-btn {
+        padding: 0.4rem 0.75rem;
+        border: 1px solid #e5e9f2;
+        background-color: white;
+        border-radius: 6px;
+        color: #64748b;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.85rem;
+    }
+    
+    .kb-filter-btn.active {
+        background-color: #4A6CF7;
+        border-color: #4A6CF7;
+        color: white;
+    }
+    
+    .kb-filter-btn:hover {
+        border-color: #4A6CF7;
+        color: #4A6CF7;
+    }
+    
+    .kb-filter-btn.active:hover {
+        background-color: #3a5ad1;
+        color: white;
+    }
+    
+    .kb-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .kb-card {
+        background-color: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e5e9f2;
+        transition: all 0.2s ease;
+        position: relative;
+    }
+    
+    .kb-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .kb-card-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+    
+    .kb-card-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        margin-right: 1rem;
+        flex-shrink: 0;
+    }
+    
+    .kb-card-icon.public {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+    }
+    
+    .kb-card-icon.private {
+        background-color: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+    }
+    
+    .kb-card-icon.shared {
+        background-color: rgba(74, 108, 247, 0.1);
+        color: #4A6CF7;
+    }
+    
+    .kb-card-info {
+        flex: 1;
+    }
+    
+    .kb-card-title {
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+        color: #1e293b;
+    }
+    
+    .kb-card-desc {
+        color: #64748b;
+        font-size: 0.9rem;
+        line-height: 1.4;
+        margin-bottom: 1rem;
+    }
+    
+    .kb-card-meta {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-size: 0.8rem;
+        color: #94a3b8;
+        margin-bottom: 1rem;
+    }
+    
+    .kb-card-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    
+    .kb-card-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .kb-card-action {
+        padding: 0.4rem 0.75rem;
+        border: 1px solid #e5e9f2;
+        background-color: white;
+        border-radius: 4px;
+        color: #64748b;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.8rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    
+    .kb-card-action:hover {
+        border-color: #4A6CF7;
+        color: #4A6CF7;
+        text-decoration: none;
+    }
+    
+    .kb-card-action.primary {
+        background-color: #4A6CF7;
+        border-color: #4A6CF7;
+        color: white;
+    }
+    
+    .kb-card-action.primary:hover {
+        background-color: #3a5ad1;
+        color: white;
+    }
+    
+    .kb-card-menu {
+        position: relative;
+    }
+    
+    .kb-card-menu-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 4px;
+        border: none;
+        background-color: transparent;
+        color: #94a3b8;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+    }
+    
+    .kb-card-menu-btn:hover {
+        background-color: #f1f5f9;
+        color: #64748b;
+    }
+    
+    .kb-empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    
+    .kb-empty-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 16px;
+        background-color: rgba(74, 108, 247, 0.1);
+        color: #4A6CF7;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        margin: 0 auto 1.5rem;
+    }
+    
+    .kb-empty-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #1e293b;
+    }
+    
+    .kb-empty-desc {
+        color: #64748b;
+        margin-bottom: 2rem;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .kb-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .kb-stat-card {
+        background-color: white;
+        padding: 1.25rem;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e5e9f2;
+    }
+    
+    .kb-stat-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+    }
+    
+    .kb-stat-title {
+        font-size: 0.85rem;
+        color: #64748b;
+        font-weight: 500;
+    }
+    
+    .kb-stat-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(74, 108, 247, 0.1);
+        color: #4A6CF7;
+    }
+    
+    .kb-stat-value {
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: #1e293b;
+    }
+    
+    .kb-stat-change {
+        font-size: 0.8rem;
+        color: #10b981;
+        margin-top: 0.25rem;
+    }
+    
+    .kb-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .kb-badge.public {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+    }
+    
+    .kb-badge.private {
+        background-color: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+    }
+    
+    .kb-badge.shared {
+        background-color: rgba(74, 108, 247, 0.1);
+        color: #4A6CF7;
+    }
+    
+    .kb-badge.archived {
+        background-color: rgba(107, 114, 128, 0.1);
+        color: #6b7280;
+    }
+    
+    @media (max-width: 768px) {
+        .kb-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .kb-filters {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .kb-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .kb-stats {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <!-- 左侧导航栏 -->
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <a href="{{ url_for('dashboard') }}">
+                <div class="sidebar-brand-icon">
+                    <img src="{{ url_for('static', filename='img/logo-icon.svg') }}" alt="Logo Icon" onerror="this.src='{{ url_for('static', filename='img/default-logo.png') }}'">
+                </div>
+                <div class="sidebar-brand-text">
+                    <img src="{{ url_for('static', filename='img/logo-text.svg') }}" alt="Logo Text" onerror="this.src='{{ url_for('static', filename='img/default-logo-text.png') }}'">
+                    <span>iDOC</span>
+                </div>
+            </a>
+        </div>
+        
+        <!-- 导航菜单 -->
+        <div class="sidebar-nav">
+            <a href="{{ url_for('dashboard') }}" class="nav-item">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>仪表板</span>
+            </a>
+            
+            <div class="nav-item" data-bs-toggle="collapse" data-bs-target="#collapseKnowledgeBase" aria-expanded="true">
+                <i class="fas fa-book"></i>
+                <span>企业知识库</span>
+                <i class="fas fa-chevron-down ms-auto"></i>
+            </div>
+            <div class="collapse show" id="collapseKnowledgeBase">
+                <a href="{{ url_for('knowledge_base') }}" class="nav-item ms-4 py-2 active">
+                    <i class="fas fa-folder-open"></i>
+                    <span>所有知识库</span>
+                </a>
+                <a href="{{ url_for('knowledge_base') }}?action=import" class="nav-item ms-4 py-2">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <span>导入知识</span>
+                </a>
+                <a href="{{ url_for('knowledge_base') }}?action=settings" class="nav-item ms-4 py-2">
+                    <i class="fas fa-cogs"></i>
+                    <span>知识库设置</span>
+                </a>
+            </div>
+            
+            <div class="nav-item" data-bs-toggle="collapse" data-bs-target="#collapseDocuments" aria-expanded="false">
+                <i class="fas fa-file-alt"></i>
+                <span>文档管理</span>
+                <i class="fas fa-chevron-down ms-auto"></i>
+            </div>
+            <div class="collapse" id="collapseDocuments">
+                <a href="{{ url_for('documents_list') }}" class="nav-item ms-4 py-2">
+                    <i class="fas fa-list"></i>
+                    <span>所有文档</span>
+                </a>
+                <a href="{{ url_for('documents_list') }}?action=upload" class="nav-item ms-4 py-2">
+                    <i class="fas fa-upload"></i>
+                    <span>上传文档</span>
+                </a>
+                <a href="{{ url_for('documents_list') }}?action=recent" class="nav-item ms-4 py-2">
+                    <i class="fas fa-clock"></i>
+                    <span>最近文档</span>
+                </a>
+                <a href="{{ url_for('documents_list') }}?action=starred" class="nav-item ms-4 py-2">
+                    <i class="fas fa-star"></i>
+                    <span>星标文档</span>
+                </a>
+            </div>
+            
+            <div class="nav-item" data-bs-toggle="collapse" data-bs-target="#collapseWorkflow" aria-expanded="false">
+                <i class="fas fa-project-diagram"></i>
+                <span>工作流管理</span>
+                <i class="fas fa-chevron-down ms-auto"></i>
+            </div>
+            <div class="collapse" id="collapseWorkflow">
+                <a href="{{ url_for('workflow_create') }}" class="nav-item ms-4 py-2">
+                    <i class="fas fa-plus"></i>
+                    <span>创建工作流</span>
+                </a>
+                <a href="{{ url_for('workflow_create') }}?action=templates" class="nav-item ms-4 py-2">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>工作流模板</span>
+                </a>
+                <a href="{{ url_for('workflow_create') }}?action=running" class="nav-item ms-4 py-2">
+                    <i class="fas fa-play-circle"></i>
+                    <span>运行中工作流</span>
+                </a>
+                <a href="{{ url_for('workflow_create') }}?action=history" class="nav-item ms-4 py-2">
+                    <i class="fas fa-history"></i>
+                    <span>历史工作流</span>
+                </a>
+            </div>
+            
+            <div class="nav-item" data-bs-toggle="collapse" data-bs-target="#collapseAnalysis" aria-expanded="false">
+                <i class="fas fa-chart-bar"></i>
+                <span>AI分析</span>
+                <i class="fas fa-chevron-down ms-auto"></i>
+            </div>
+            <div class="collapse" id="collapseAnalysis">
+                <a href="{{ url_for('ai_analysis') }}" class="nav-item ms-4 py-2">
+                    <i class="fas fa-search"></i>
+                    <span>内容分析</span>
+                </a>
+                <a href="{{ url_for('ai_analysis') }}?action=compare" class="nav-item ms-4 py-2">
+                    <i class="fas fa-not-equal"></i>
+                    <span>文档对比</span>
+                </a>
+                <a href="{{ url_for('ai_analysis') }}?action=extract" class="nav-item ms-4 py-2">
+                    <i class="fas fa-filter"></i>
+                    <span>信息提取</span>
+                </a>
+                <a href="{{ url_for('ai_analysis') }}?action=summary" class="nav-item ms-4 py-2">
+                    <i class="fas fa-compress-alt"></i>
+                    <span>文档摘要</span>
+                </a>
+            </div>
+            
+            <div class="nav-item" data-bs-toggle="collapse" data-bs-target="#collapseAgent" aria-expanded="false">
+                <i class="fas fa-robot"></i>
+                <span>Agent Chat</span>
+                <i class="fas fa-chevron-down ms-auto"></i>
+            </div>
+            <div class="collapse" id="collapseAgent">
+                <a href="{{ url_for('agent_chat') }}" class="nav-item ms-4 py-2">
+                    <i class="fas fa-comments"></i>
+                    <span>新会话</span>
+                </a>
+                <a href="{{ url_for('agent_chat_history') }}" class="nav-item ms-4 py-2">
+                    <i class="fas fa-history"></i>
+                    <span>聊天历史</span>
+                </a>
+                <a href="{{ url_for('multi_agent_workshop') }}" class="nav-item ms-4 py-2">
+                    <i class="fas fa-users-cog"></i>
+                    <span>多Agent协作</span>
+                </a>
+                <a href="{{ url_for('agent_settings') }}" class="nav-item ms-4 py-2">
+                    <i class="fas fa-sliders-h"></i>
+                    <span>Agent设置</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">用户</div>
+            
+            <a href="{{ url_for('account_settings') }}" class="nav-item">
+                <i class="fas fa-user-cog"></i>
+                <span>账户设置</span>
+            </a>
+            
+            <a href="{{ url_for('notifications') }}" class="nav-item">
+                <i class="fas fa-bell"></i>
+                <span>通知</span>
+                <span class="badge rounded-pill bg-primary ms-auto">3</span>
+            </a>
+            
+            <a href="{{ url_for('logout') }}" class="nav-item">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>退出登录</span>
+            </a>
+        </div>
+    </div>
+    
+    <!-- 主内容区域 -->
+    <div class="main-content">
+        <div class="knowledge-base-container">
+            <!-- 页面头部 -->
+            <div class="kb-header">
+                <h1 class="kb-title">企业知识库</h1>
+                <div class="kb-actions">
+                    <a href="#" class="btn-outline" onclick="importKnowledge()">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        导入知识
+                    </a>
+                    <a href="#" class="btn-primary" onclick="createKnowledgeBase()">
+                        <i class="fas fa-plus"></i>
+                        创建知识库
+                    </a>
+                </div>
+            </div>
+            
+            <!-- 统计信息 -->
+            <div class="kb-stats">
+                <div class="kb-stat-card">
+                    <div class="kb-stat-header">
+                        <div class="kb-stat-title">总知识库</div>
+                        <div class="kb-stat-icon">
+                            <i class="fas fa-database"></i>
+                        </div>
+                    </div>
+                    <div class="kb-stat-value">8</div>
+                    <div class="kb-stat-change">+2 本月</div>
+                </div>
+                
+                <div class="kb-stat-card">
+                    <div class="kb-stat-header">
+                        <div class="kb-stat-title">文档总数</div>
+                        <div class="kb-stat-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                    </div>
+                    <div class="kb-stat-value">1,247</div>
+                    <div class="kb-stat-change">+86 本周</div>
+                </div>
+                
+                <div class="kb-stat-card">
+                    <div class="kb-stat-header">
+                        <div class="kb-stat-title">共享知识库</div>
+                        <div class="kb-stat-icon">
+                            <i class="fas fa-share-alt"></i>
+                        </div>
+                    </div>
+                    <div class="kb-stat-value">5</div>
+                    <div class="kb-stat-change">+1 本月</div>
+                </div>
+                
+                <div class="kb-stat-card">
+                    <div class="kb-stat-header">
+                        <div class="kb-stat-title">活跃用户</div>
+                        <div class="kb-stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                    <div class="kb-stat-value">24</div>
+                    <div class="kb-stat-change">+3 本周</div>
+                </div>
+            </div>
+            
+            <!-- 搜索和筛选 -->
+            <div class="kb-filters">
+                <div class="kb-search">
+                    <i class="fas fa-search kb-search-icon"></i>
+                    <input type="text" placeholder="搜索知识库..." id="kb-search-input">
+                </div>
+                
+                <div class="kb-filter-group">
+                    <button class="kb-filter-btn active" data-filter="all">全部</button>
+                    <button class="kb-filter-btn" data-filter="public">公开</button>
+                    <button class="kb-filter-btn" data-filter="private">私有</button>
+                    <button class="kb-filter-btn" data-filter="shared">共享</button>
+                    <button class="kb-filter-btn" data-filter="starred">收藏</button>
+                    <button class="kb-filter-btn" data-filter="archived">已归档</button>
+                </div>
+            </div>
+            
+            <!-- 知识库网格 -->
+            <div class="kb-grid">
+                <!-- 企业法务知识库 -->
+                <div class="kb-card" data-category="public">
+                    <div class="kb-card-header">
+                        <div style="display: flex; align-items: center;">
+                            <div class="kb-card-icon public">
+                                <i class="fas fa-gavel"></i>
+                            </div>
+                            <div class="kb-card-info">
+                                <div class="kb-card-title">企业法务知识库</div>
+                                <div class="kb-badge public">公开</div>
+                            </div>
+                        </div>
+                        <div class="kb-card-menu">
+                            <button class="kb-card-menu-btn">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="kb-card-desc">
+                        包含合同模板、法律条款解释、合规指南等法务相关知识文档，为业务决策提供法律支持。
+                    </div>
+                    
+                    <div class="kb-card-meta">
+                        <div class="kb-card-meta-item">
+                            <i class="fas fa-file-alt"></i>
+                            <span>156 文档</span>
+                        </div>
+                        <div class="kb-card-meta-item">
+                            <i class="fas fa-clock"></i>
+                            <span>2天前更新</span>
+                        </div>
+                        <div class="kb-card-meta-item">
+                            <i class="fas fa-users"></i>
+                            <span>8 协作者</span>
+                        </div>
+                    </div>
+                    
+                    <div class="kb-card-actions">
+                        <a href="#" class="kb-card-action primary">浏览</a>
+                        <a href="#" class="kb-card-action">编辑</a>
+                        <a href="#" class="kb-card-action">
+                            <i class="fas fa-star"></i>
+                            收藏
+                        </a>
+                        <a href="#" class="kb-card-action">
+                            <i class="fas fa-share-alt"></i>
+                            共享
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 财务管理知识库 -->
+                <div class="kb-card" data-category="private">
+                    <div class="kb-card-header">
+                        <div style="display: flex; align-items: center;">
+                            <div class="kb-card-icon private">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="kb-card-info">
+                                <div class="kb-card-title">财务管理知识库</div>
+                                <div class="kb-badge private">私有</div>
+                            </div>
+                        </div>
+                        <div class="kb-card-menu">
+                            <button class="kb-card-menu-btn">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="kb-card-desc">
+                        财务报表模板、预算管理流程、成本控制方法等财务专业知识，帮助优化企业财务管理。
+                    </div>
+                    
+                    <div class="kb-card-meta">
+                        <div class="kb-card-meta-item">
+                            <i class="fas fa-file-alt"></i>
+                            <span>89 文档</span>
+                        </div>
+                        <div class="kb-card-meta-item">
+                            <i class="fas fa-clock"></i>
+                            <span>1周前更新</span>
+                        </div>
+                        <div class="kb-card-meta-item">
+                            <i class="fas fa-users"></i>
+                            <span>5 协作者</span>
+                        </div>
+                    </div>
+                    
+                    <div class="kb-card-actions">
+                        <a href="#" class="kb-card-action primary">浏览</a>
+                        <a href="#" class="kb-card-action">编辑</a>
+                        <a href="#" class="kb-card-action">
+                            <i class="fas fa-star"></i>
+                            收藏
+                        </a>
+                        <a href="#" class="kb-card-action">
+                            <i class="fas fa-share-alt"></i>
+                            共享
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 人力资源知识库 -->
+                <div class="kb-card" data-category="shared">
+                    <div class="kb-card-header">
+                        <div style="display: flex; align-items: center;">
+                            <div class="kb-card-icon shared">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="kb-card-info">
+                                <div class="kb-card-title">人力资源知识库</div>
+                                <div class="kb-badge shared">共享</div>
+                            </div>
+                        </div>
+                        <div class="kb-card-menu">
+                            <button class="kb-card-menu-btn">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="kb-card-desc">
+                        员工手册、招聘流程、绩效考核制度等人力资源管理相关文档和最佳实践。
+                    </div>
+                    
+                    <div class="kb-card-meta">
+                        <div class="kb-card-meta-item">
+                            <i class="fas fa-file-alt"></i>
+                            <span>234 文档</span>
+                        </div>
+                        <div class="kb-card-meta-item">
+                            <i class="fas fa-clock"></i>
+                            <span>3天前更新</span>
+                        </div>
+                        <div class="kb-card-meta-item">
+                            <i class="fas fa-users"></i>
+                            <span>12 协作者</span>
+                        </div>
+                    </div>
+                    
+                    <div class="kb-card-actions">
+                        <a href="#" class="kb-card-action primary">浏览</a>
+                        <a href="#" class="kb-card-action">编辑</a>
+                        <a href="#" class="kb-card-action">
+                            <i class="fas fa-star text-warning"></i>
+                            已收藏
+                        </a>
+                        <a href="#" class="kb-card-action">
+                            <i class="fas fa-share-alt"></i>
+                            共享
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 技术文档知识库 -->
+                <div class="kb-card" data-category="public">
+                    <div class="kb-card-header">
+                        <div style="display: flex; align-items: center;">
+                            <div class="kb-card-icon public">
+                                <i class="fas fa-code"></i>
+                            </div>
+                            <div class="kb-card-info">
+                                <div class="kb-card-title">技术文档知识库</div>
+                                <div class="kb-badge public">公开</div>
+                            </div>
+                        </div>
+                        <div class="kb-card-menu">
+                            <button class="kb-card-menu-btn">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="kb-card-desc">
+                        API文档、系统架构说明、开发规范等技术相关文档，为开发团队提供技术支撑。
+                    </div>
+                    
+                    <div class="kb-card-meta">
+                        <div class="kb-card-meta-item">
+                            <i class="fas fa-file-alt"></i>
+                            <span>312 文档</span>
+                        </div>
+                        <div class="kb-card-meta-item">
+                            <i class="fas fa-clock"></i>
+                            <span>5小时前更新</span>
+                        </div>
+                        <div class="kb-card-meta-item">
+                            <i class="fas fa-users"></i>
+                            <span>15 协作者</span>
+                        </div>
+                    </div>
+                    
+                    <div class="kb-card-actions">
+                        <a href="#" class="kb-card-action primary">浏览</a>
+                        <a href="#" class="kb-card-action">编辑</a>
+                        <a href="#" class="kb-card-action">
+                            <i class="fas fa-star"></i>
+                            收藏
+                        </a>
+                        <a href="#" class="kb-card-action">
+                            <i class="fas fa-share-alt"></i>
+                            共享
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 产品文档知识库 -->
+                <div class="kb-card" data-category="shared">
+                    <div class="kb-card-header">
+                        <div style="display: flex; align-items: center;">
+                            <div class="kb-card-icon shared">
+                                <i class="fas fa-box"></i>
+                            </div>
+                            <div class="kb-card-info">
+                                <div class="kb-card-title">产品文档知识库</div>
+                                <div class="kb-badge shared">共享</div>
+                            </div>
+                        </div>
+                        <div class="kb-card-menu">
+                            <button class="kb-card-menu-btn">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="kb-card-desc">
+                        产品需求文档、用户手册、功能说明等产品相关文档，支持产品开发和用户服务。
+                    </div>
+                    
+                    <div class="kb-card-meta">
+                        <div class="kb-card-meta-item">
+                            <i class="fas fa-file-alt"></i>
+                            <span>198 文档</span>
+                        </div>
+                        <div class="kb-card-meta-item">
+                            <i class="fas fa-clock"></i>
+                            <span>1天前更新</span>
+                        </div>
+                        <div class="kb-card-meta-item">
+                            <i class="fas fa-users"></i>
+                            <span>10 协作者</span>
+                        </div>
+                    </div>
+                    
+                    <div class="kb-card-actions">
+                        <a href="#" class="kb-card-action primary">浏览</a>
+                        <a href="#" class="kb-card-action">编辑</a>
+                        <a href="#" class="kb-card-action">
+                            <i class="fas fa-star text-warning"></i>
+                            已收藏
+                        </a>
+                        <a href="#" class="kb-card-action">
+                            <i class="fas fa-share-alt"></i>
+                            共享
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 市场营销知识库 -->
+                <div class="kb-card" data-category="private">
+                    <div class="kb-card-header">
+                        <div style="display: flex; align-items: center;">
+                            <div class="kb-card-icon private">
+                                <i class="fas fa-bullhorn"></i>
+                            </div>
+                            <div class="kb-card-info">
+                                <div class="kb-card-title">市场营销知识库</div>
+                                <div class="kb-badge private">私有</div>
+                            </div>
+                        </div>
+                        <div class="kb-card-menu">
+                            <button class="kb-card-menu-btn">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="kb-card-desc">
+                        营销策略、品牌指南、市场调研报告等营销相关文档，助力市场推广和品牌建设。
+                    </div>
+                    
+                    <div class="kb-card-meta">
+                        <div class="kb-card-meta-item">
+                            <i class="fas fa-file-alt"></i>
+                            <span>145 文档</span>
+                        </div>
+                        <div class="kb-card-meta-item">
+                            <i class="fas fa-clock"></i>
+                            <span>4天前更新</span>
+                        </div>
+                        <div class="kb-card-meta-item">
+                            <i class="fas fa-users"></i>
+                            <span>6 协作者</span>
+                        </div>
+                    </div>
+                    
+                    <div class="kb-card-actions">
+                        <a href="#" class="kb-card-action primary">浏览</a>
+                        <a href="#" class="kb-card-action">编辑</a>
+                        <a href="#" class="kb-card-action">
+                            <i class="fas fa-star"></i>
+                            收藏
+                        </a>
+                        <a href="#" class="kb-card-action">
+                            <i class="fas fa-share-alt"></i>
+                            共享
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 创建知识库模态框 -->
+<div class="modal fade" id="createKbModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">创建新知识库</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createKbForm">
+                    <div class="mb-3">
+                        <label for="kbName" class="form-label">知识库名称</label>
+                        <input type="text" class="form-control" id="kbName" placeholder="输入知识库名称">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="kbDesc" class="form-label">描述</label>
+                        <textarea class="form-control" id="kbDesc" rows="3" placeholder="描述知识库的用途和内容"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="kbCategory" class="form-label">分类</label>
+                        <select class="form-select" id="kbCategory">
+                            <option value="">选择分类</option>
+                            <option value="legal">法务</option>
+                            <option value="finance">财务</option>
+                            <option value="hr">人力资源</option>
+                            <option value="tech">技术</option>
+                            <option value="product">产品</option>
+                            <option value="marketing">市场营销</option>
+                            <option value="operations">运营</option>
+                            <option value="other">其他</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">访问权限</label>
+                        <div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="kbAccess" id="accessPrivate" value="private" checked>
+                                <label class="form-check-label" for="accessPrivate">
+                                    私有 - 只有您可以访问
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="kbAccess" id="accessShared" value="shared">
+                                <label class="form-check-label" for="accessShared">
+                                    共享 - 指定团队成员可以访问
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="kbAccess" id="accessPublic" value="public">
+                                <label class="form-check-label" for="accessPublic">
+                                    公开 - 组织内所有成员可以访问
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3" id="collaboratorsSection" style="display: none;">
+                        <label for="kbCollaborators" class="form-label">协作者</label>
+                        <input type="text" class="form-control" id="kbCollaborators" placeholder="输入邮箱地址，用逗号分隔">
+                        <div class="form-text">输入要邀请的协作者邮箱地址</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="saveKnowledgeBase()">创建知识库</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 筛选功能
+        const filterBtns = document.querySelectorAll('.kb-filter-btn');
+        const kbCards = document.querySelectorAll('.kb-card');
+        
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                // 更新活动状态
+                filterBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                const filter = this.getAttribute('data-filter');
+                
+                // 筛选卡片
+                kbCards.forEach(card => {
+                    if (filter === 'all') {
+                        card.style.display = 'block';
+                    } else if (filter === 'starred') {
+                        // 显示已收藏的
+                        const starBtn = card.querySelector('.kb-card-action .fa-star');
+                        if (starBtn && starBtn.classList.contains('text-warning')) {
+                            card.style.display = 'block';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    } else {
+                        const category = card.getAttribute('data-category');
+                        if (category === filter) {
+                            card.style.display = 'block';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    }
+                });
+            });
+        });
+        
+        // 搜索功能
+        const searchInput = document.getElementById('kb-search-input');
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            
+            kbCards.forEach(card => {
+                const title = card.querySelector('.kb-card-title').textContent.toLowerCase();
+                const desc = card.querySelector('.kb-card-desc').textContent.toLowerCase();
+                
+                if (title.includes(searchTerm) || desc.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+        
+        // 收藏功能
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('fa-star') || e.target.closest('.kb-card-action')?.querySelector('.fa-star')) {
+                e.preventDefault();
+                const starIcon = e.target.classList.contains('fa-star') ? e.target : e.target.querySelector('.fa-star');
+                const actionBtn = starIcon.closest('.kb-card-action');
+                
+                if (starIcon.classList.contains('text-warning')) {
+                    starIcon.classList.remove('text-warning');
+                    actionBtn.innerHTML = '<i class="fas fa-star"></i> 收藏';
+                } else {
+                    starIcon.classList.add('text-warning');
+                    actionBtn.innerHTML = '<i class="fas fa-star text-warning"></i> 已收藏';
+                }
+            }
+        });
+        
+        // 访问权限变化处理
+        const accessRadios = document.querySelectorAll('input[name="kbAccess"]');
+        const collaboratorsSection = document.getElementById('collaboratorsSection');
+        
+        accessRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'shared') {
+                    collaboratorsSection.style.display = 'block';
+                } else {
+                    collaboratorsSection.style.display = 'none';
+                }
+            });
+        });
+    });
+    
+    // 创建知识库
+    function createKnowledgeBase() {
+        const modal = new bootstrap.Modal(document.getElementById('createKbModal'));
+        modal.show();
+    }
+    
+    // 保存知识库
+    function saveKnowledgeBase() {
+        const name = document.getElementById('kbName').value;
+        const desc = document.getElementById('kbDesc').value;
+        const category = document.getElementById('kbCategory').value;
+        const access = document.querySelector('input[name="kbAccess"]:checked').value;
+        const collaborators = document.getElementById('kbCollaborators').value;
+        
+        if (!name.trim()) {
+            alert('请输入知识库名称');
+            return;
+        }
+        
+        // 这里应该发送到后端保存
+        console.log('创建知识库:', {
+            name,
+            desc,
+            category,
+            access,
+            collaborators
+        });
+        
+        alert('知识库创建成功！');
+        bootstrap.Modal.getInstance(document.getElementById('createKbModal')).hide();
+        
+        // 重新加载页面或更新UI
+        setTimeout(() => {
+            location.reload();
+        }, 1000);
+    }
+    
+    // 导入知识
+    function importKnowledge() {
+        alert('导入知识功能开发中，敬请期待！');
+    }
+</script>
+{% endblock %}
