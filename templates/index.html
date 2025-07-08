@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+
+{% block title %}Document Intelligence Platform{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <nav class="navbar navbar-expand-lg navbar-light bg-white py-3">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-file-earmark-text" viewBox="0 0 16 16">
+                    <path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1zM5 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5"/>
+                    <path d="M9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.5zm0 1v2A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z"/>
+                </svg>
+                <span class="ms-2 fw-bold"><span class="text-primary">i</span>DOC</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Solutions</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Features</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Pricing</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Enterprise</a>
+                    </li>
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-primary ms-2">Dashboard</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a href="{{ url_for('login') }}" class="btn btn-outline-primary me-2">Sign In</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('register') }}" class="btn btn-primary">Sign Up</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <header class="py-5 bg-light">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-4 fw-bold mb-3">AI-powered Document Intelligence</h1>
+                    <p class="lead mb-4">Extract key data from your documents in seconds, not hours. Transform how your organization processes documents with enterprise-grade security and seamless integration.</p>
+                    <div class="d-grid gap-2 d-md-flex">
+                        <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg px-4 me-md-2">Get Started</a>
+                        <a href="#" class="btn btn-outline-primary btn-lg px-4">Request Demo</a>
+                    </div>
+                </div>
+                <div class="col-lg-6 d-flex justify-content-center mt-5 mt-lg-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" fill="currentColor" class="bi bi-file-earmark-text" viewBox="0 0 16 16">
+                        <path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1zM5 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5"/>
+                        <path d="M9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.5zm0 1v2A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <section class="py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold">Key Features</h2>
+                <p class="lead text-muted">Our platform offers powerful document processing capabilities</p>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-3">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="rounded-circle bg-primary bg-opacity-10 p-3 d-inline-flex mb-3">
+                                <i class="fas fa-robot text-primary fa-2x"></i>
+                            </div>
+                            <h5 class="card-title">AI-powered Intelligence</h5>
+                            <p class="card-text text-muted">Automatically extract and classify information from any document type.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-3">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="rounded-circle bg-primary bg-opacity-10 p-3 d-inline-flex mb-3">
+                                <i class="fas fa-bolt text-primary fa-2x"></i>
+                            </div>
+                            <h5 class="card-title">Lightning Fast</h5>
+                            <p class="card-text text-muted">Process thousands of documents in minutes with high accuracy.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-3">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="rounded-circle bg-primary bg-opacity-10 p-3 d-inline-flex mb-3">
+                                <i class="fas fa-shield-alt text-primary fa-2x"></i>
+                            </div>
+                            <h5 class="card-title">Enterprise Security</h5>
+                            <p class="card-text text-muted">Bank-level security with SOC 2, HIPAA and GDPR compliance.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-3">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="rounded-circle bg-primary bg-opacity-10 p-3 d-inline-flex mb-3">
+                                <i class="fas fa-plug text-primary fa-2x"></i>
+                            </div>
+                            <h5 class="card-title">Seamless Integration</h5>
+                            <p class="card-text text-muted">Connect with existing workflows through our no-code integration.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h2 class="fw-bold mb-4">Transform your document workflows</h2>
+                    <p class="mb-4">iDOC helps enterprises automate document processing, reduce manual data entry, and streamline operations across departments.</p>
+                    
+                    <div class="d-flex mb-3">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-check-circle text-primary fa-2x"></i>
+                        </div>
+                        <div class="ms-3">
+                            <h5>Reduce processing time by 90%</h5>
+                            <p class="text-muted">Automate manual data extraction and entry tasks.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex mb-3">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-check-circle text-primary fa-2x"></i>
+                        </div>
+                        <div class="ms-3">
+                            <h5>Increase accuracy to 99%</h5>
+                            <p class="text-muted">Eliminate human errors in document processing.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-check-circle text-primary fa-2x"></i>
+                        </div>
+                        <div class="ms-3">
+                            <h5>Scale without adding headcount</h5>
+                            <p class="text-muted">Process more documents without increasing staff.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6 mt-5 mt-lg-0">
+                    <div class="card border-0 shadow">
+                        <div class="card-body p-5">
+                            <h3 class="card-title text-center mb-4">Request a Demo</h3>
+                            <form>
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Full Name</label>
+                                    <input type="text" class="form-control" id="name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Work Email</label>
+                                    <input type="email" class="form-control" id="email" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="company" class="form-label">Company</label>
+                                    <input type="text" class="form-control" id="company" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="message" class="form-label">Message</label>
+                                    <textarea class="form-control" id="message" rows="3"></textarea>
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary btn-lg">Request Demo</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <footer class="py-5 bg-dark text-white">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <div class="d-flex align-items-center mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-file-earmark-text text-white" viewBox="0 0 16 16">
+                            <path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1zM5 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5"/>
+                            <path d="M9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.5zm0 1v2A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z"/>
+                        </svg>
+                        <span class="ms-2 fw-bold fs-5"><span class="text-primary">i</span>DOC</span>
+                    </div>
+                    <p class="text-muted">AI-powered document intelligence platform for enterprises.</p>
+                    <div class="d-flex gap-3">
+                        <a href="#" class="text-white"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-facebook"></i></a>
+                    </div>
+                </div>
+                
+                <div class="col-md-2 mb-4 mb-md-0">
+                    <h5 class="mb-3">Product</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Features</a></li>
+                        <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Pricing</a></li>
+                        <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Case Studies</a></li>
+                        <li class="mb-2"><a href="#" class="text-muted text-decoration-none">API</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-md-2 mb-4 mb-md-0">
+                    <h5 class="mb-3">Company</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#" class="text-muted text-decoration-none">About</a></li>
+                        <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Blog</a></li>
+                        <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Careers</a></li>
+                        <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-md-4">
+                    <h5 class="mb-3">Subscribe to our newsletter</h5>
+                    <p class="text-muted">Get the latest news and updates from iDOC.</p>
+                    <form class="mb-3">
+                        <div class="input-group">
+                            <input type="email" class="form-control" placeholder="Your email">
+                            <button class="btn btn-primary">Subscribe</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <hr class="my-4 bg-secondary">
+            
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="small text-muted mb-0">&copy; 2025 iDOC. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <ul class="list-inline mb-0">
+                        <li class="list-inline-item"><a href="#" class="text-muted small">Privacy Policy</a></li>
+                        <li class="list-inline-item"><span class="text-muted mx-1">•</span></li>
+                        <li class="list-inline-item"><a href="#" class="text-muted small">Terms of Service</a></li>
+                        <li class="list-inline-item"><span class="text-muted mx-1">•</span></li>
+                        <li class="list-inline-item"><a href="#" class="text-muted small">Cookie Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+</div>
+{% endblock %}

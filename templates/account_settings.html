@@ -1,0 +1,1131 @@
+{% extends "base.html" %}
+
+{% block title %}账户设置 - iDOC{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background-color: #f5f8fa;
+        min-height: 100vh;
+        font-family: 'Inter', sans-serif;
+    }
+    
+    .dashboard-layout {
+        display: flex;
+        min-height: calc(100vh - 1rem);
+    }
+    
+    .sidebar {
+        width: 250px;
+        background-color: #fff;
+        border-right: 1px solid #e5e9f2;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+        position: fixed;
+        height: 100vh;
+        z-index: 1000;
+    }
+    
+    .main-content {
+        flex: 1;
+        margin-left: 250px;
+        padding: 2rem;
+    }
+    
+    .content-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    
+    .page-title {
+        margin: 0;
+        font-weight: 600;
+    }
+    
+    .settings-container {
+        background-color: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    .settings-sidebar {
+        width: 250px;
+        background-color: #f8f9fa;
+        border-right: 1px solid #e5e9f2;
+        padding: 1.5rem 0;
+    }
+    
+    .settings-nav-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1.5rem;
+        color: #495057;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    
+    .settings-nav-item:hover {
+        background-color: rgba(74, 108, 247, 0.05);
+        color: #4A6CF7;
+    }
+    
+    .settings-nav-item.active {
+        background-color: rgba(74, 108, 247, 0.1);
+        color: #4A6CF7;
+        border-left: 3px solid #4A6CF7;
+    }
+    
+    .settings-nav-item i {
+        margin-right: 0.75rem;
+        width: 20px;
+        text-align: center;
+    }
+    
+    .settings-content {
+        padding: 2rem;
+        flex: 1;
+    }
+    
+    .settings-section {
+        margin-bottom: 2.5rem;
+    }
+    
+    .settings-section:last-child {
+        margin-bottom: 0;
+    }
+    
+    .settings-section-title {
+        font-weight: 600;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #e5e9f2;
+        display: flex;
+        align-items: center;
+    }
+    
+    .settings-section-title i {
+        margin-right: 0.75rem;
+        color: #4A6CF7;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-text {
+        color: #6c757d;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+    
+    .profile-image-container {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+        border: 3px solid #fff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .profile-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .profile-image-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #e9ecef;
+        color: #6c757d;
+        font-size: 2.5rem;
+    }
+    
+    .profile-image-edit {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background-color: #4A6CF7;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .profile-image-edit:hover {
+        background-color: #3a5bd9;
+    }
+    
+    .personal-info-form {
+        max-width: 500px;
+    }
+    
+    .settings-password-form {
+        max-width: 500px;
+    }
+    
+    .security-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 1.25rem;
+        padding-bottom: 1.25rem;
+        border-bottom: 1px solid #e5e9f2;
+    }
+    
+    .security-item:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+    
+    .security-item-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        background-color: rgba(74, 108, 247, 0.1);
+        color: #4A6CF7;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        flex-shrink: 0;
+    }
+    
+    .security-item-content {
+        flex: 1;
+    }
+    
+    .security-item-title {
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+    }
+    
+    .security-item-description {
+        color: #6c757d;
+        font-size: 0.875rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .security-item-status {
+        display: flex;
+        align-items: center;
+    }
+    
+    .security-status-enabled {
+        color: #28a745;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+    }
+    
+    .security-status-disabled {
+        color: #dc3545;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+    }
+    
+    .security-status-icon {
+        margin-right: 0.5rem;
+    }
+    
+    .security-item-action {
+        margin-left: auto;
+    }
+    
+    .connected-app {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        transition: all 0.2s ease;
+    }
+    
+    .connected-app:hover {
+        background-color: #e9ecef;
+    }
+    
+    .connected-app-icon {
+        width: 48px;
+        height: 48px;
+        background-color: white;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        border: 1px solid #e5e9f2;
+        flex-shrink: 0;
+    }
+    
+    .connected-app-icon img {
+        width: 28px;
+        height: 28px;
+        object-fit: contain;
+    }
+    
+    .connected-app-info {
+        flex: 1;
+    }
+    
+    .connected-app-name {
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+    }
+    
+    .connected-app-description {
+        color: #6c757d;
+        font-size: 0.875rem;
+    }
+    
+    .connected-app-status {
+        display: flex;
+        align-items: center;
+        margin-left: 1rem;
+    }
+    
+    .notification-preference {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e5e9f2;
+    }
+    
+    .notification-preference:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+    
+    .notification-preference-info {
+        flex: 1;
+    }
+    
+    .notification-preference-title {
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+    }
+    
+    .notification-preference-description {
+        color: #6c757d;
+        font-size: 0.875rem;
+    }
+    
+    .notification-preference-controls {
+        display: flex;
+        align-items: center;
+    }
+    
+    .notification-control {
+        margin-left: 1rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .notification-control-label {
+        margin-left: 0.5rem;
+        white-space: nowrap;
+    }
+    
+    .subscription-plan {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid #e5e9f2;
+    }
+    
+    .subscription-plan-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .subscription-plan-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        background-color: rgba(74, 108, 247, 0.1);
+        color: #4A6CF7;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+    }
+    
+    .subscription-plan-title {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+    
+    .subscription-plan-price {
+        color: #6c757d;
+    }
+    
+    .subscription-plan-details {
+        margin-bottom: 1rem;
+    }
+    
+    .subscription-plan-feature {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 0.5rem;
+    }
+    
+    .subscription-plan-feature:last-child {
+        margin-bottom: 0;
+    }
+    
+    .subscription-plan-feature-icon {
+        color: #28a745;
+        margin-right: 0.5rem;
+        margin-top: 0.25rem;
+    }
+    
+    .company-info-form {
+        max-width: 500px;
+    }
+    
+    @media (max-width: 992px) {
+        .main-content {
+            margin-left: 64px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <!-- Sidebar would be included here -->
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="content-header">
+            <div>
+                <h1 class="page-title">账户设置</h1>
+                <p class="text-muted">管理您的账户、安全和个人偏好设置</p>
+            </div>
+        </div>
+        
+        <div class="settings-container">
+            <div class="row g-0">
+                <!-- Settings Sidebar -->
+                <div class="col-md-3 settings-sidebar">
+                    <div class="settings-nav-item active" data-target="profile">
+                        <i class="fas fa-user"></i>
+                        <span>个人资料</span>
+                    </div>
+                    <div class="settings-nav-item" data-target="security">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>安全设置</span>
+                    </div>
+                    <div class="settings-nav-item" data-target="notifications">
+                        <i class="fas fa-bell"></i>
+                        <span>通知偏好</span>
+                    </div>
+                    <div class="settings-nav-item" data-target="connected">
+                        <i class="fas fa-plug"></i>
+                        <span>第三方应用</span>
+                    </div>
+                    <div class="settings-nav-item" data-target="subscription">
+                        <i class="fas fa-credit-card"></i>
+                        <span>订阅与账单</span>
+                    </div>
+                    {% if current_user.is_enterprise %}
+                    <div class="settings-nav-item" data-target="enterprise">
+                        <i class="fas fa-building"></i>
+                        <span>企业设置</span>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Settings Content -->
+                <div class="col-md-9 settings-content">
+                    <!-- Profile Section -->
+                    <div class="settings-section" id="profileSection">
+                        <h3 class="settings-section-title">
+                            <i class="fas fa-user"></i>
+                            个人资料
+                        </h3>
+                        
+                        <div class="mb-4">
+                            <div class="profile-image-container">
+                                {% if current_user.profile_image_url %}
+                                <img src="{{ current_user.profile_image_url }}" alt="Profile Image" class="profile-image">
+                                {% else %}
+                                <div class="profile-image-placeholder">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                {% endif %}
+                                <div class="profile-image-edit" title="更改头像">
+                                    <i class="fas fa-camera"></i>
+                                </div>
+                            </div>
+                            <input type="file" id="profileImageInput" style="display: none;">
+                        </div>
+                        
+                        <form class="personal-info-form">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="firstName" class="form-label">名字</label>
+                                        <input type="text" class="form-control" id="firstName" value="{{ current_user.first_name or '' }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="lastName" class="form-label">姓氏</label>
+                                        <input type="text" class="form-control" id="lastName" value="{{ current_user.last_name or '' }}">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="email" class="form-label">电子邮箱</label>
+                                <input type="email" class="form-control" id="email" value="{{ current_user.email }}" readonly>
+                                <div class="form-text">邮箱地址不可更改。如需更改，请联系管理员。</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="phone" class="form-label">电话号码</label>
+                                <input type="tel" class="form-control" id="phone" placeholder="例如: 138 1234 5678">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="jobTitle" class="form-label">职位</label>
+                                <input type="text" class="form-control" id="jobTitle" placeholder="例如: 财务经理">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="department" class="form-label">部门</label>
+                                <input type="text" class="form-control" id="department" placeholder="例如: 财务部">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="location" class="form-label">所在地</label>
+                                <input type="text" class="form-control" id="location" placeholder="例如: 北京">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="timezone" class="form-label">时区</label>
+                                <select class="form-select" id="timezone">
+                                    <option value="Asia/Shanghai">中国标准时间 (UTC+8)</option>
+                                    <option value="Asia/Hong_Kong">香港时间 (UTC+8)</option>
+                                    <option value="Asia/Tokyo">日本时间 (UTC+9)</option>
+                                    <option value="America/New_York">美国东部时间 (UTC-5)</option>
+                                    <option value="Europe/London">英国时间 (UTC+0)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <button type="button" class="btn btn-primary me-2">保存更改</button>
+                                <button type="button" class="btn btn-outline-secondary">取消</button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Security Section -->
+                    <div class="settings-section" id="securitySection" style="display: none;">
+                        <h3 class="settings-section-title">
+                            <i class="fas fa-shield-alt"></i>
+                            安全设置
+                        </h3>
+                        
+                        <div class="mb-4">
+                            <h5 class="mb-3">更改密码</h5>
+                            <form class="settings-password-form">
+                                <div class="form-group">
+                                    <label for="currentPassword" class="form-label">当前密码</label>
+                                    <input type="password" class="form-control" id="currentPassword">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="newPassword" class="form-label">新密码</label>
+                                    <input type="password" class="form-control" id="newPassword">
+                                    <div class="form-text">密码至少需要8个字符，包含数字、大小写字母和特殊符号。</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="confirmPassword" class="form-label">确认新密码</label>
+                                    <input type="password" class="form-control" id="confirmPassword">
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <button type="button" class="btn btn-primary">更新密码</button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <div class="mt-5">
+                            <h5 class="mb-3">高级安全设置</h5>
+                            
+                            <div class="security-item">
+                                <div class="security-item-icon">
+                                    <i class="fas fa-key fa-lg"></i>
+                                </div>
+                                <div class="security-item-content">
+                                    <div class="security-item-title">两步验证</div>
+                                    <div class="security-item-description">
+                                        使用您的手机或验证器应用为账户添加额外的安全保护层。
+                                    </div>
+                                    <div class="security-item-status">
+                                        <div class="security-status-disabled">
+                                            <i class="fas fa-times-circle security-status-icon"></i>
+                                            未启用
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="security-item-action">
+                                    <button class="btn btn-outline-primary btn-sm">启用</button>
+                                </div>
+                            </div>
+                            
+                            <div class="security-item">
+                                <div class="security-item-icon">
+                                    <i class="fas fa-history fa-lg"></i>
+                                </div>
+                                <div class="security-item-content">
+                                    <div class="security-item-title">登录历史</div>
+                                    <div class="security-item-description">
+                                        查看您的账户最近的登录活动，确保没有未授权的访问。
+                                    </div>
+                                </div>
+                                <div class="security-item-action">
+                                    <button class="btn btn-outline-secondary btn-sm">查看记录</button>
+                                </div>
+                            </div>
+                            
+                            <div class="security-item">
+                                <div class="security-item-icon">
+                                    <i class="fas fa-envelope fa-lg"></i>
+                                </div>
+                                <div class="security-item-content">
+                                    <div class="security-item-title">安全通知</div>
+                                    <div class="security-item-description">
+                                        当检测到可疑活动时，我们会通过电子邮件向您发送警报。
+                                    </div>
+                                    <div class="security-item-status">
+                                        <div class="security-status-enabled">
+                                            <i class="fas fa-check-circle security-status-icon"></i>
+                                            已启用
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="security-item-action">
+                                    <button class="btn btn-outline-secondary btn-sm">管理</button>
+                                </div>
+                            </div>
+                            
+                            <div class="security-item">
+                                <div class="security-item-icon">
+                                    <i class="fas fa-lock fa-lg"></i>
+                                </div>
+                                <div class="security-item-content">
+                                    <div class="security-item-title">会话管理</div>
+                                    <div class="security-item-description">
+                                        查看并管理您当前的活跃会话，可以远程注销其他设备上的会话。
+                                    </div>
+                                </div>
+                                <div class="security-item-action">
+                                    <button class="btn btn-outline-secondary btn-sm">管理会话</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Notifications Section -->
+                    <div class="settings-section" id="notificationsSection" style="display: none;">
+                        <h3 class="settings-section-title">
+                            <i class="fas fa-bell"></i>
+                            通知偏好
+                        </h3>
+                        
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="mb-3">通知渠道</h5>
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
+                                        <label class="form-check-label" for="emailNotifications">
+                                            电子邮件通知
+                                        </label>
+                                    </div>
+                                    <div class="form-text">重要更新和通知将发送到您的注册邮箱。</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="browserNotifications">
+                                        <label class="form-check-label" for="browserNotifications">
+                                            浏览器通知
+                                        </label>
+                                    </div>
+                                    <div class="form-text">当浏览器打开时，接收实时通知和提醒。</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="mobileNotifications">
+                                        <label class="form-check-label" for="mobileNotifications">
+                                            移动应用通知
+                                        </label>
+                                    </div>
+                                    <div class="form-text">通过移动应用接收推送通知。</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h5 class="mb-3">通知类型设置</h5>
+                        
+                        <div class="notification-preference">
+                            <div class="notification-preference-info">
+                                <div class="notification-preference-title">文档更新</div>
+                                <div class="notification-preference-description">
+                                    当您的文档被更新或有新评论时通知您。
+                                </div>
+                            </div>
+                            <div class="notification-preference-controls">
+                                <div class="notification-control">
+                                    <input class="form-check-input" type="checkbox" id="docUpdateEmail" checked>
+                                    <label class="notification-control-label" for="docUpdateEmail">
+                                        邮件
+                                    </label>
+                                </div>
+                                <div class="notification-control">
+                                    <input class="form-check-input" type="checkbox" id="docUpdateBrowser" checked>
+                                    <label class="notification-control-label" for="docUpdateBrowser">
+                                        浏览器
+                                    </label>
+                                </div>
+                                <div class="notification-control">
+                                    <input class="form-check-input" type="checkbox" id="docUpdateMobile" checked>
+                                    <label class="notification-control-label" for="docUpdateMobile">
+                                        移动
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="notification-preference">
+                            <div class="notification-preference-info">
+                                <div class="notification-preference-title">工作流完成通知</div>
+                                <div class="notification-preference-description">
+                                    当您的文档工作流程序处理完成时通知您。
+                                </div>
+                            </div>
+                            <div class="notification-preference-controls">
+                                <div class="notification-control">
+                                    <input class="form-check-input" type="checkbox" id="workflowEmail" checked>
+                                    <label class="notification-control-label" for="workflowEmail">
+                                        邮件
+                                    </label>
+                                </div>
+                                <div class="notification-control">
+                                    <input class="form-check-input" type="checkbox" id="workflowBrowser" checked>
+                                    <label class="notification-control-label" for="workflowBrowser">
+                                        浏览器
+                                    </label>
+                                </div>
+                                <div class="notification-control">
+                                    <input class="form-check-input" type="checkbox" id="workflowMobile" checked>
+                                    <label class="notification-control-label" for="workflowMobile">
+                                        移动
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="notification-preference">
+                            <div class="notification-preference-info">
+                                <div class="notification-preference-title">AI分析结果</div>
+                                <div class="notification-preference-description">
+                                    当AI完成文档分析任务时通知您。
+                                </div>
+                            </div>
+                            <div class="notification-preference-controls">
+                                <div class="notification-control">
+                                    <input class="form-check-input" type="checkbox" id="aiAnalysisEmail" checked>
+                                    <label class="notification-control-label" for="aiAnalysisEmail">
+                                        邮件
+                                    </label>
+                                </div>
+                                <div class="notification-control">
+                                    <input class="form-check-input" type="checkbox" id="aiAnalysisBrowser" checked>
+                                    <label class="notification-control-label" for="aiAnalysisBrowser">
+                                        浏览器
+                                    </label>
+                                </div>
+                                <div class="notification-control">
+                                    <input class="form-check-input" type="checkbox" id="aiAnalysisMobile" checked>
+                                    <label class="notification-control-label" for="aiAnalysisMobile">
+                                        移动
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="notification-preference">
+                            <div class="notification-preference-info">
+                                <div class="notification-preference-title">系统通知</div>
+                                <div class="notification-preference-description">
+                                    有关系统更新、维护和重要公告的通知。
+                                </div>
+                            </div>
+                            <div class="notification-preference-controls">
+                                <div class="notification-control">
+                                    <input class="form-check-input" type="checkbox" id="systemEmail" checked>
+                                    <label class="notification-control-label" for="systemEmail">
+                                        邮件
+                                    </label>
+                                </div>
+                                <div class="notification-control">
+                                    <input class="form-check-input" type="checkbox" id="systemBrowser">
+                                    <label class="notification-control-label" for="systemBrowser">
+                                        浏览器
+                                    </label>
+                                </div>
+                                <div class="notification-control">
+                                    <input class="form-check-input" type="checkbox" id="systemMobile">
+                                    <label class="notification-control-label" for="systemMobile">
+                                        移动
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="notification-preference">
+                            <div class="notification-preference-info">
+                                <div class="notification-preference-title">协作通知</div>
+                                <div class="notification-preference-description">
+                                    当有人与您共享文档或邀请您协作时通知您。
+                                </div>
+                            </div>
+                            <div class="notification-preference-controls">
+                                <div class="notification-control">
+                                    <input class="form-check-input" type="checkbox" id="collaborationEmail" checked>
+                                    <label class="notification-control-label" for="collaborationEmail">
+                                        邮件
+                                    </label>
+                                </div>
+                                <div class="notification-control">
+                                    <input class="form-check-input" type="checkbox" id="collaborationBrowser" checked>
+                                    <label class="notification-control-label" for="collaborationBrowser">
+                                        浏览器
+                                    </label>
+                                </div>
+                                <div class="notification-control">
+                                    <input class="form-check-input" type="checkbox" id="collaborationMobile" checked>
+                                    <label class="notification-control-label" for="collaborationMobile">
+                                        移动
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <button type="button" class="btn btn-primary">保存设置</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Connected Apps Section -->
+                    <div class="settings-section" id="connectedSection" style="display: none;">
+                        <h3 class="settings-section-title">
+                            <i class="fas fa-plug"></i>
+                            已连接的应用
+                        </h3>
+                        
+                        <div class="alert alert-info mb-4">
+                            <i class="fas fa-info-circle me-2"></i>
+                            已连接的第三方应用可以访问您的iDOC账户信息和文档。请定期审核并移除不再需要的应用。
+                        </div>
+                        
+                        <div class="connected-app">
+                            <div class="connected-app-icon">
+                                <i class="fab fa-google fa-lg" style="color: #4285F4;"></i>
+                            </div>
+                            <div class="connected-app-info">
+                                <div class="connected-app-name">Google Workspace</div>
+                                <div class="connected-app-description">
+                                    用于访问和导入Google Drive文档、日历集成和单点登录。
+                                </div>
+                            </div>
+                            <div class="connected-app-status">
+                                <span class="badge bg-success">已连接</span>
+                            </div>
+                            <button class="btn btn-outline-danger btn-sm ms-3">断开连接</button>
+                        </div>
+                        
+                        <div class="connected-app">
+                            <div class="connected-app-icon">
+                                <i class="fab fa-microsoft fa-lg" style="color: #00A4EF;"></i>
+                            </div>
+                            <div class="connected-app-info">
+                                <div class="connected-app-name">Microsoft 365</div>
+                                <div class="connected-app-description">
+                                    用于访问和导入OneDrive文档、Outlook日历集成和Microsoft Teams共享。
+                                </div>
+                            </div>
+                            <div class="connected-app-status">
+                                <span class="badge bg-success">已连接</span>
+                            </div>
+                            <button class="btn btn-outline-danger btn-sm ms-3">断开连接</button>
+                        </div>
+                        
+                        <div class="connected-app">
+                            <div class="connected-app-icon">
+                                <i class="fab fa-slack fa-lg" style="color: #4A154B;"></i>
+                            </div>
+                            <div class="connected-app-info">
+                                <div class="connected-app-name">Slack</div>
+                                <div class="connected-app-description">
+                                    用于文档共享通知和工作流完成提醒。
+                                </div>
+                            </div>
+                            <div class="connected-app-status">
+                                <span class="badge bg-success">已连接</span>
+                            </div>
+                            <button class="btn btn-outline-danger btn-sm ms-3">断开连接</button>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <button class="btn btn-outline-primary">
+                                <i class="fas fa-plus me-2"></i> 连接新应用
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Subscription Section -->
+                    <div class="settings-section" id="subscriptionSection" style="display: none;">
+                        <h3 class="settings-section-title">
+                            <i class="fas fa-credit-card"></i>
+                            订阅与账单
+                        </h3>
+                        
+                        <div class="subscription-plan">
+                            <div class="subscription-plan-header">
+                                <div class="subscription-plan-icon">
+                                    <i class="fas fa-crown fa-lg"></i>
+                                </div>
+                                <div>
+                                    <div class="subscription-plan-title">专业版</div>
+                                    <div class="subscription-plan-price">￥199/月，按年付费</div>
+                                </div>
+                            </div>
+                            
+                            <div class="subscription-plan-details">
+                                <div class="subscription-plan-feature">
+                                    <i class="fas fa-check subscription-plan-feature-icon"></i>
+                                    <div>无限文档处理</div>
+                                </div>
+                                <div class="subscription-plan-feature">
+                                    <i class="fas fa-check subscription-plan-feature-icon"></i>
+                                    <div>高级AI分析功能</div>
+                                </div>
+                                <div class="subscription-plan-feature">
+                                    <i class="fas fa-check subscription-plan-feature-icon"></i>
+                                    <div>优先支持服务</div>
+                                </div>
+                                <div class="subscription-plan-feature">
+                                    <i class="fas fa-check subscription-plan-feature-icon"></i>
+                                    <div>自定义工作流模板</div>
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-info mb-3">
+                                <div class="d-flex">
+                                    <i class="fas fa-info-circle me-2 mt-1"></i>
+                                    <div>
+                                        <strong>订阅状态：</strong> 有效，将于2026年5月19日续费
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <button class="btn btn-outline-primary me-2">升级套餐</button>
+                                <button class="btn btn-outline-secondary">管理付款方式</button>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">账单历史</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>日期</th>
+                                                <th>描述</th>
+                                                <th>金额</th>
+                                                <th>状态</th>
+                                                <th>发票</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>2025-05-19</td>
+                                                <td>专业版年度订阅</td>
+                                                <td>￥2,388.00</td>
+                                                <td><span class="badge bg-success">已支付</span></td>
+                                                <td><a href="#" class="btn btn-sm btn-outline-secondary"><i class="fas fa-download me-1"></i> 下载</a></td>
+                                            </tr>
+                                            <tr>
+                                                <td>2024-05-19</td>
+                                                <td>专业版年度订阅</td>
+                                                <td>￥2,388.00</td>
+                                                <td><span class="badge bg-success">已支付</span></td>
+                                                <td><a href="#" class="btn btn-sm btn-outline-secondary"><i class="fas fa-download me-1"></i> 下载</a></td>
+                                            </tr>
+                                            <tr>
+                                                <td>2023-05-19</td>
+                                                <td>专业版年度订阅</td>
+                                                <td>￥2,388.00</td>
+                                                <td><span class="badge bg-success">已支付</span></td>
+                                                <td><a href="#" class="btn btn-sm btn-outline-secondary"><i class="fas fa-download me-1"></i> 下载</a></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Enterprise Section -->
+                    {% if current_user.is_enterprise %}
+                    <div class="settings-section" id="enterpriseSection" style="display: none;">
+                        <h3 class="settings-section-title">
+                            <i class="fas fa-building"></i>
+                            企业设置
+                        </h3>
+                        
+                        <div class="mb-4">
+                            <h5 class="mb-3">企业资料</h5>
+                            <form class="company-info-form">
+                                <div class="form-group">
+                                    <label for="companyName" class="form-label">公司名称</label>
+                                    <input type="text" class="form-control" id="companyName" value="{{ current_user.enterprise_profile.company_name }}">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="companySize" class="form-label">公司规模</label>
+                                    <select class="form-select" id="companySize">
+                                        <option value="1-10" {% if current_user.enterprise_profile.company_size == '1-10' %}selected{% endif %}>1-10人</option>
+                                        <option value="11-50" {% if current_user.enterprise_profile.company_size == '11-50' %}selected{% endif %}>11-50人</option>
+                                        <option value="51-200" {% if current_user.enterprise_profile.company_size == '51-200' %}selected{% endif %}>51-200人</option>
+                                        <option value="201-500" {% if current_user.enterprise_profile.company_size == '201-500' %}selected{% endif %}>201-500人</option>
+                                        <option value="501-1000" {% if current_user.enterprise_profile.company_size == '501-1000' %}selected{% endif %}>501-1000人</option>
+                                        <option value="1001+" {% if current_user.enterprise_profile.company_size == '1001+' %}selected{% endif %}>1000人以上</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="industry" class="form-label">行业</label>
+                                    <input type="text" class="form-control" id="industry" value="{{ current_user.enterprise_profile.industry or '' }}">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="businessEmail" class="form-label">企业邮箱</label>
+                                    <input type="email" class="form-control" id="businessEmail" value="{{ current_user.enterprise_profile.business_email }}">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="businessPhone" class="form-label">企业电话</label>
+                                    <input type="tel" class="form-control" id="businessPhone" value="{{ current_user.enterprise_profile.business_phone or '' }}">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="country" class="form-label">国家/地区</label>
+                                    <input type="text" class="form-control" id="country" value="{{ current_user.enterprise_profile.country or '' }}">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="address" class="form-label">详细地址</label>
+                                    <textarea class="form-control" id="address" rows="3">{{ current_user.enterprise_profile.address or '' }}</textarea>
+                                </div>
+                                
+                                <div class="mt-4">
+                                    <button type="button" class="btn btn-primary me-2">保存更改</button>
+                                    <button type="button" class="btn btn-outline-secondary">取消</button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <div class="mt-5">
+                            <h5 class="mb-3">企业成员管理</h5>
+                            <div class="alert alert-info mb-3">
+                                <i class="fas fa-info-circle me-2"></i>
+                                企业成员管理功能仅对管理员可见。如需调整成员权限，请联系您的企业管理员。
+                            </div>
+                            <button class="btn btn-outline-primary">
+                                <i class="fas fa-users me-2"></i> 查看成员列表
+                            </button>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Settings navigation
+        const navItems = document.querySelectorAll('.settings-nav-item');
+        const sections = document.querySelectorAll('.settings-section');
+        
+        navItems.forEach(item => {
+            item.addEventListener('click', function() {
+                const target = this.getAttribute('data-target');
+                
+                // Update active nav item
+                navItems.forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Show target section, hide others
+                sections.forEach(section => {
+                    section.style.display = 'none';
+                });
+                document.getElementById(`${target}Section`).style.display = 'block';
+            });
+        });
+        
+        // Profile image upload
+        const profileImageEdit = document.querySelector('.profile-image-edit');
+        const profileImageInput = document.getElementById('profileImageInput');
+        
+        if (profileImageEdit && profileImageInput) {
+            profileImageEdit.addEventListener('click', function() {
+                profileImageInput.click();
+            });
+            
+            profileImageInput.addEventListener('change', function() {
+                // In a real app, this would handle the image upload
+                console.log('Image selected:', this.files[0]);
+                // You'd typically show a preview and handle the upload to the server
+            });
+        }
+    });
+</script>
+{% endblock %}

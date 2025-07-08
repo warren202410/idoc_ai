@@ -1,0 +1,1679 @@
+{% extends "base.html" %}
+
+{% block title %}信息提取 - iDOC{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<style>
+    body {
+        background-color: #f8fafc;
+        min-height: 100vh;
+        font-family: 'Inter', sans-serif;
+    }
+    
+    .extract-layout {
+        display: flex;
+        height: calc(100vh - 1rem);
+        gap: 0;
+    }
+    
+    .extract-sidebar {
+        width: 300px;
+        background: white;
+        border-right: 1px solid #e2e8f0;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    
+    .extract-main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background-color: #f8fafc;
+    }
+    
+    .sidebar-header {
+        padding: 2rem 1.5rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .sidebar-title {
+        font-size: 1.375rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+    }
+    
+    .sidebar-subtitle {
+        color: #64748b;
+        font-size: 0.85rem;
+        line-height: 1.5;
+    }
+    
+    .extract-types {
+        flex: 1;
+        padding: 1.5rem;
+        overflow-y: auto;
+    }
+    
+    .type-section {
+        margin-bottom: 2rem;
+    }
+    
+    .type-title {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    .type-item {
+        display: flex;
+        align-items: center;
+        padding: 0.875rem;
+        margin-bottom: 0.5rem;
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .type-item:hover {
+        border-color: #4f46e5;
+        background: white;
+    }
+    
+    .type-item.active {
+        border-color: #4f46e5;
+        background: white;
+        box-shadow: 0 2px 8px rgba(79, 70, 229, 0.1);
+    }
+    
+    .type-checkbox {
+        margin-right: 0.75rem;
+        accent-color: #4f46e5;
+    }
+    
+    .type-info {
+        flex: 1;
+    }
+    
+    .type-name {
+        font-weight: 600;
+        color: #1e293b;
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .type-desc {
+        color: #64748b;
+        font-size: 0.75rem;
+        line-height: 1.3;
+    }
+    
+    .main-header {
+        background: white;
+        padding: 2rem;
+        border-bottom: 1px solid #e2e8f0;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    
+    .main-title {
+        font-size: 1.875rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0;
+    }
+    
+    .main-subtitle {
+        color: #64748b;
+        font-size: 1rem;
+        margin-top: 0.5rem;
+    }
+    
+    .content-area {
+        flex: 1;
+        padding: 2rem;
+        overflow-y: auto;
+    }
+    
+    .upload-section {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .section-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        background-color: #4f46e5;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+    }
+    
+    .upload-zone {
+        border: 2px dashed #cbd5e1;
+        border-radius: 8px;
+        padding: 3rem 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: #fafafa;
+        margin-bottom: 1.5rem;
+    }
+    
+    .upload-zone:hover {
+        border-color: #4f46e5;
+        background: #f8fafc;
+    }
+    
+    .upload-zone.dragover {
+        border-color: #4f46e5;
+        background: #f1f5f9;
+        transform: scale(1.02);
+    }
+    
+    .upload-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 12px;
+        background-color: #4f46e5;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin: 0 auto 1.5rem;
+    }
+    
+    .upload-text {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+    }
+    
+    .upload-hint {
+        color: #64748b;
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .file-list {
+        margin-top: 1.5rem;
+    }
+    
+    .file-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: 6px;
+        margin-bottom: 0.75rem;
+        border: 1px solid #e2e8f0;
+    }
+    
+    .file-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex: 1;
+    }
+    
+    .file-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 6px;
+        background-color: #4f46e5;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+    }
+    
+    .file-details {
+        flex: 1;
+    }
+    
+    .file-name {
+        font-weight: 500;
+        color: #1e293b;
+        margin-bottom: 0.25rem;
+        font-size: 0.9rem;
+    }
+    
+    .file-meta {
+        color: #64748b;
+        font-size: 0.8rem;
+    }
+    
+    .file-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .file-action {
+        padding: 0.5rem;
+        border: none;
+        background: white;
+        color: #64748b;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .file-action:hover {
+        background: #f1f5f9;
+        color: #374151;
+    }
+    
+    .file-action.remove:hover {
+        background: #fef2f2;
+        color: #ef4444;
+    }
+    
+    .config-section {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    .config-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+    }
+    
+    .config-group {
+        background: #f8fafc;
+        padding: 1.5rem;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+    }
+    
+    .group-title {
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #1e293b;
+        font-size: 1rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+    
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #374151;
+        font-size: 0.9rem;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        transition: border-color 0.2s ease;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+    
+    .results-section {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        display: none;
+    }
+    
+    .results-section.show {
+        display: block;
+    }
+    
+    .extraction-progress {
+        margin-bottom: 2rem;
+    }
+    
+    .progress-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    
+    .progress-text {
+        font-size: 0.9rem;
+        color: #64748b;
+    }
+    
+    .progress-percentage {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #1e293b;
+    }
+    
+    .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: #e5e7eb;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        border-radius: 4px;
+        transition: width 0.3s ease;
+    }
+    
+    .results-tabs {
+        display: flex;
+        border-bottom: 1px solid #e2e8f0;
+        margin-bottom: 2rem;
+    }
+    
+    .tab-button {
+        padding: 1rem 1.5rem;
+        border: none;
+        background: transparent;
+        color: #64748b;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        border-bottom: 2px solid transparent;
+    }
+    
+    .tab-button:hover {
+        color: #374151;
+    }
+    
+    .tab-button.active {
+        color: #4f46e5;
+        border-bottom-color: #4f46e5;
+    }
+    
+    .tab-content {
+        display: none;
+    }
+    
+    .tab-content.active {
+        display: block;
+    }
+    
+    .extraction-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .extraction-card {
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 1.5rem;
+        border: 1px solid #e2e8f0;
+    }
+    
+    .card-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .card-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        margin-right: 1rem;
+        color: white;
+    }
+    
+    .card-icon.contact { background: linear-gradient(135deg, #10b981, #059669); }
+    .card-icon.date { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+    .card-icon.money { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .card-icon.organization { background: linear-gradient(135deg, #ef4444, #dc2626); }
+    .card-icon.location { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+    .card-icon.number { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+    
+    .card-title {
+        font-weight: 600;
+        color: #1e293b;
+        font-size: 1rem;
+    }
+    
+    .card-count {
+        color: #64748b;
+        font-size: 0.8rem;
+        margin-left: auto;
+    }
+    
+    .extracted-items {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .extracted-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem;
+        background: white;
+        border-radius: 6px;
+        border: 1px solid #e2e8f0;
+    }
+    
+    .item-content {
+        flex: 1;
+    }
+    
+    .item-value {
+        font-weight: 500;
+        color: #1e293b;
+        margin-bottom: 0.25rem;
+        font-size: 0.9rem;
+    }
+    
+    .item-context {
+        color: #64748b;
+        font-size: 0.75rem;
+        font-style: italic;
+    }
+    
+    .item-confidence {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: 80px;
+    }
+    
+    .confidence-bar {
+        width: 40px;
+        height: 4px;
+        background: #e5e7eb;
+        border-radius: 2px;
+        overflow: hidden;
+    }
+    
+    .confidence-fill {
+        height: 100%;
+        border-radius: 2px;
+        transition: width 0.3s ease;
+    }
+    
+    .confidence-fill.high {
+        background: linear-gradient(135deg, #10b981, #059669);
+    }
+    
+    .confidence-fill.medium {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+    
+    .confidence-fill.low {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+    }
+    
+    .confidence-text {
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: #64748b;
+    }
+    
+    .table-view {
+        overflow-x: auto;
+    }
+    
+    .extraction-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+    }
+    
+    .extraction-table th {
+        background: #f8fafc;
+        padding: 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0;
+        font-weight: 600;
+        color: #374151;
+    }
+    
+    .extraction-table td {
+        padding: 0.75rem;
+        border-bottom: 1px solid #f1f5f9;
+        color: #64748b;
+    }
+    
+    .extraction-table tr:hover {
+        background: #f8fafc;
+    }
+    
+    .export-options {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .btn-primary {
+        background-color: #4f46e5;
+        color: white;
+        border: 1px solid #4f46e5;
+    }
+    
+    .btn-primary:hover {
+        background-color: #4338ca;
+        border-color: #4338ca;
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-secondary {
+        background-color: white;
+        color: #374151;
+        border: 1px solid #d1d5db;
+    }
+    
+    .btn-secondary:hover {
+        background-color: #f9fafb;
+        border-color: #9ca3af;
+        color: #374151;
+        text-decoration: none;
+    }
+    
+    .action-bar {
+        background: white;
+        padding: 1.5rem 2rem;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.05);
+    }
+    
+    .status-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+    
+    .btn-group {
+        display: flex;
+        gap: 0.75rem;
+    }
+    
+    @media (max-width: 1024px) {
+        .extract-layout {
+            flex-direction: column;
+            height: auto;
+        }
+        
+        .extract-sidebar {
+            width: auto;
+            border-right: none;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .extract-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+        }
+        
+        .type-section {
+            margin-bottom: 0;
+        }
+        
+        .config-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .extraction-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <!-- 左侧导航栏 -->
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <a href="{{ url_for('dashboard') }}">
+                <div class="sidebar-brand-icon">
+                    <img src="{{ url_for('static', filename='img/logo-icon.svg') }}" alt="Logo Icon" onerror="this.src='{{ url_for('static', filename='img/default-logo.png') }}'">
+                </div>
+                <div class="sidebar-brand-text">
+                    <img src="{{ url_for('static', filename='img/logo-text.svg') }}" alt="Logo Text" onerror="this.src='{{ url_for('static', filename='img/default-logo-text.png') }}'">
+                    <span>iDOC</span>
+                </div>
+            </a>
+        </div>
+        
+        <!-- 导航菜单 -->
+        <div class="sidebar-nav">
+            <a href="{{ url_for('dashboard') }}" class="nav-item">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>仪表板</span>
+            </a>
+            
+            <div class="nav-item" data-bs-toggle="collapse" data-bs-target="#collapseKnowledgeBase" aria-expanded="false">
+                <i class="fas fa-book"></i>
+                <span>企业知识库</span>
+                <i class="fas fa-chevron-down ms-auto"></i>
+            </div>
+            <div class="collapse" id="collapseKnowledgeBase">
+                <a href="{{ url_for('knowledge_base') }}" class="nav-item ms-4 py-2">
+                    <i class="fas fa-folder-open"></i>
+                    <span>所有知识库</span>
+                </a>
+                <a href="{{ url_for('knowledge_base') }}?action=import" class="nav-item ms-4 py-2">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <span>导入知识</span>
+                </a>
+                <a href="{{ url_for('knowledge_base') }}?action=settings" class="nav-item ms-4 py-2">
+                    <i class="fas fa-cogs"></i>
+                    <span>知识库设置</span>
+                </a>
+            </div>
+            
+            <div class="nav-item" data-bs-toggle="collapse" data-bs-target="#collapseDocuments" aria-expanded="false">
+                <i class="fas fa-file-alt"></i>
+                <span>文档管理</span>
+                <i class="fas fa-chevron-down ms-auto"></i>
+            </div>
+            <div class="collapse" id="collapseDocuments">
+                <a href="{{ url_for('documents_list') }}" class="nav-item ms-4 py-2">
+                    <i class="fas fa-list"></i>
+                    <span>所有文档</span>
+                </a>
+                <a href="{{ url_for('documents_list') }}?action=upload" class="nav-item ms-4 py-2">
+                    <i class="fas fa-upload"></i>
+                    <span>上传文档</span>
+                </a>
+                <a href="{{ url_for('documents_list') }}?action=recent" class="nav-item ms-4 py-2">
+                    <i class="fas fa-clock"></i>
+                    <span>最近文档</span>
+                </a>
+                <a href="{{ url_for('documents_list') }}?action=starred" class="nav-item ms-4 py-2">
+                    <i class="fas fa-star"></i>
+                    <span>星标文档</span>
+                </a>
+            </div>
+            
+            <div class="nav-item" data-bs-toggle="collapse" data-bs-target="#collapseWorkflow" aria-expanded="false">
+                <i class="fas fa-project-diagram"></i>
+                <span>智能流程设计</span>
+                <i class="fas fa-chevron-down ms-auto"></i>
+            </div>
+            <div class="collapse" id="collapseWorkflow">
+                <a href="{{ url_for('workflow_create') }}" class="nav-item ms-4 py-2">
+                    <i class="fas fa-plus"></i>
+                    <span>创建智能流程</span>
+                </a>
+                <a href="{{ url_for('workflow_create') }}?action=templates" class="nav-item ms-4 py-2">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>流程模板库</span>
+                </a>
+                <a href="{{ url_for('workflow_create') }}?action=running" class="nav-item ms-4 py-2">
+                    <i class="fas fa-play-circle"></i>
+                    <span>运行中流程</span>
+                </a>
+                <a href="{{ url_for('workflow_create') }}?action=history" class="nav-item ms-4 py-2">
+                    <i class="fas fa-history"></i>
+                    <span>流程执行历史</span>
+                </a>
+            </div>
+            
+            <div class="nav-item" data-bs-toggle="collapse" data-bs-target="#collapseAnalysis" aria-expanded="true">
+                <i class="fas fa-chart-bar"></i>
+                <span>AI分析</span>
+                <i class="fas fa-chevron-down ms-auto"></i>
+            </div>
+            <div class="collapse show" id="collapseAnalysis">
+                <a href="{{ url_for('ai_analysis') }}" class="nav-item ms-4 py-2">
+                    <i class="fas fa-search"></i>
+                    <span>内容分析</span>
+                </a>
+                <a href="{{ url_for('ai_analysis') }}?action=compare" class="nav-item ms-4 py-2">
+                    <i class="fas fa-not-equal"></i>
+                    <span>文档对比</span>
+                </a>
+                <a href="{{ url_for('ai_analysis') }}?action=extract" class="nav-item ms-4 py-2 active">
+                    <i class="fas fa-filter"></i>
+                    <span>信息提取</span>
+                </a>
+                <a href="{{ url_for('ai_analysis') }}?action=summary" class="nav-item ms-4 py-2">
+                    <i class="fas fa-compress-alt"></i>
+                    <span>文档摘要</span>
+                </a>
+            </div>
+            
+            <div class="nav-item" data-bs-toggle="collapse" data-bs-target="#collapseAgent" aria-expanded="false">
+                <i class="fas fa-robot"></i>
+                <span>Agent Chat</span>
+                <i class="fas fa-chevron-down ms-auto"></i>
+            </div>
+            <div class="collapse" id="collapseAgent">
+                <a href="{{ url_for('agent_chat') }}" class="nav-item ms-4 py-2">
+                    <i class="fas fa-comments"></i>
+                    <span>新会话</span>
+                </a>
+                <a href="{{ url_for('agent_chat_history') }}" class="nav-item ms-4 py-2">
+                    <i class="fas fa-history"></i>
+                    <span>聊天历史</span>
+                </a>
+                <a href="{{ url_for('multi_agent_workshop') }}" class="nav-item ms-4 py-2">
+                    <i class="fas fa-users-cog"></i>
+                    <span>多Agent协作</span>
+                </a>
+                <a href="{{ url_for('agent_settings') }}" class="nav-item ms-4 py-2">
+                    <i class="fas fa-sliders-h"></i>
+                    <span>Agent设置</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">用户</div>
+            
+            <a href="{{ url_for('account_settings') }}" class="nav-item">
+                <i class="fas fa-user-cog"></i>
+                <span>账户设置</span>
+            </a>
+            
+            <a href="{{ url_for('notifications') }}" class="nav-item">
+                <i class="fas fa-bell"></i>
+                <span>通知</span>
+                <span class="badge rounded-pill bg-primary ms-auto">3</span>
+            </a>
+            
+            <a href="{{ url_for('logout') }}" class="nav-item">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>退出登录</span>
+            </a>
+        </div>
+    </div>
+    
+    <!-- 主要信息提取界面 -->
+    <div class="main-content">
+        <div class="extract-layout">
+            <!-- 左侧提取类型选择 -->
+            <div class="extract-sidebar">
+                <div class="sidebar-header">
+                    <h2 class="sidebar-title">提取类型</h2>
+                    <p class="sidebar-subtitle">选择需要提取的信息类型</p>
+                </div>
+                
+                <div class="extract-types">
+                    <div class="type-section">
+                        <div class="type-title">联系信息</div>
+                        
+                        <div class="type-item active" data-type="phone" onclick="toggleType('phone')">
+                            <input type="checkbox" class="type-checkbox" checked>
+                            <div class="type-info">
+                                <div class="type-name">电话号码</div>
+                                <div class="type-desc">手机号、座机号、传真号</div>
+                            </div>
+                        </div>
+                        
+                        <div class="type-item active" data-type="email" onclick="toggleType('email')">
+                            <input type="checkbox" class="type-checkbox" checked>
+                            <div class="type-info">
+                                <div class="type-name">电子邮箱</div>
+                                <div class="type-desc">各种格式的邮箱地址</div>
+                            </div>
+                        </div>
+                        
+                        <div class="type-item" data-type="website" onclick="toggleType('website')">
+                            <input type="checkbox" class="type-checkbox">
+                            <div class="type-info">
+                                <div class="type-name">网站地址</div>
+                                <div class="type-desc">URL和域名信息</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="type-section">
+                        <div class="type-title">时间日期</div>
+                        
+                        <div class="type-item active" data-type="date" onclick="toggleType('date')">
+                            <input type="checkbox" class="type-checkbox" checked>
+                            <div class="type-info">
+                                <div class="type-name">日期时间</div>
+                                <div class="type-desc">年月日、时分秒信息</div>
+                            </div>
+                        </div>
+                        
+                        <div class="type-item" data-type="period" onclick="toggleType('period')">
+                            <input type="checkbox" class="type-checkbox">
+                            <div class="type-info">
+                                <div class="type-name">时间段</div>
+                                <div class="type-desc">起止时间、时间范围</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="type-section">
+                        <div class="type-title">财务信息</div>
+                        
+                        <div class="type-item active" data-type="money" onclick="toggleType('money')">
+                            <input type="checkbox" class="type-checkbox" checked>
+                            <div class="type-info">
+                                <div class="type-name">金额数字</div>
+                                <div class="type-desc">价格、费用、金额</div>
+                            </div>
+                        </div>
+                        
+                        <div class="type-item" data-type="account" onclick="toggleType('account')">
+                            <input type="checkbox" class="type-checkbox">
+                            <div class="type-info">
+                                <div class="type-name">银行账户</div>
+                                <div class="type-desc">账户号码、银行信息</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="type-section">
+                        <div class="type-title">实体信息</div>
+                        
+                        <div class="type-item active" data-type="person" onclick="toggleType('person')">
+                            <input type="checkbox" class="type-checkbox" checked>
+                            <div class="type-info">
+                                <div class="type-name">人名</div>
+                                <div class="type-desc">姓名、称谓、职位</div>
+                            </div>
+                        </div>
+                        
+                        <div class="type-item active" data-type="organization" onclick="toggleType('organization')">
+                            <input type="checkbox" class="type-checkbox" checked>
+                            <div class="type-info">
+                                <div class="type-name">组织机构</div>
+                                <div class="type-desc">公司、部门、机构名称</div>
+                            </div>
+                        </div>
+                        
+                        <div class="type-item" data-type="location" onclick="toggleType('location')">
+                            <input type="checkbox" class="type-checkbox">
+                            <div class="type-info">
+                                <div class="type-name">地点地址</div>
+                                <div class="type-desc">地址、城市、地标</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="type-section">
+                        <div class="type-title">标识符号</div>
+                        
+                        <div class="type-item" data-type="id" onclick="toggleType('id')">
+                            <input type="checkbox" class="type-checkbox">
+                            <div class="type-info">
+                                <div class="type-name">证件号码</div>
+                                <div class="type-desc">身份证、护照、执照号</div>
+                            </div>
+                        </div>
+                        
+                        <div class="type-item" data-type="code" onclick="toggleType('code')">
+                            <input type="checkbox" class="type-checkbox">
+                            <div class="type-info">
+                                <div class="type-name">编号代码</div>
+                                <div class="type-desc">产品代码、订单号</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 右侧操作区域 -->
+            <div class="extract-main">
+                <div class="main-header">
+                    <h1 class="main-title">智能信息提取</h1>
+                    <p class="main-subtitle">使用AI技术自动识别和提取文档中的关键信息，支持多种数据类型和格式</p>
+                </div>
+                
+                <div class="content-area">
+                    <!-- 文档上传区域 -->
+                    <div class="upload-section">
+                        <h3 class="section-title">
+                            <div class="section-icon">
+                                <i class="fas fa-cloud-upload"></i>
+                            </div>
+                            上传文档
+                        </h3>
+                        
+                        <div class="upload-zone" id="upload-zone">
+                            <div class="upload-icon">
+                                <i class="fas fa-file-upload"></i>
+                            </div>
+                            <div class="upload-text">拖拽文件到此处或点击选择</div>
+                            <div class="upload-hint">支持PDF、Word、Excel、图片等多种格式</div>
+                            <input type="file" id="file-input" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.txt" style="display: none;">
+                        </div>
+                        
+                        <div id="file-list" class="file-list"></div>
+                    </div>
+                    
+                    <!-- 提取配置 -->
+                    <div class="config-section">
+                        <h3 class="section-title">
+                            <div class="section-icon">
+                                <i class="fas fa-cogs"></i>
+                            </div>
+                            提取配置
+                        </h3>
+                        
+                        <div class="config-grid">
+                            <div class="config-group">
+                                <div class="group-title">基础设置</div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">提取精度</label>
+                                    <select class="form-control" id="extraction-precision">
+                                        <option value="fast">快速模式</option>
+                                        <option value="standard" selected>标准模式</option>
+                                        <option value="accurate">精确模式</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">置信度阈值</label>
+                                    <select class="form-control" id="confidence-threshold">
+                                        <option value="0.6">60% - 宽松</option>
+                                        <option value="0.8" selected>80% - 标准</option>
+                                        <option value="0.9">90% - 严格</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="config-group">
+                                <div class="group-title">输出格式</div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">导出格式</label>
+                                    <select class="form-control" id="export-format">
+                                        <option value="json">JSON</option>
+                                        <option value="csv" selected>CSV</option>
+                                        <option value="excel">Excel</option>
+                                        <option value="xml">XML</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">字符编码</label>
+                                    <select class="form-control" id="character-encoding">
+                                        <option value="utf-8" selected>UTF-8</option>
+                                        <option value="gbk">GBK</option>
+                                        <option value="ascii">ASCII</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 提取结果 -->
+                    <div class="results-section" id="results-section">
+                        <h3 class="section-title">
+                            <div class="section-icon">
+                                <i class="fas fa-list-alt"></i>
+                            </div>
+                            提取结果
+                        </h3>
+                        
+                        <div class="extraction-progress" id="extraction-progress">
+                            <div class="progress-header">
+                                <span class="progress-text">正在提取信息...</span>
+                                <span class="progress-percentage">65%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 65%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="results-tabs" id="results-tabs" style="display: none;">
+                            <button class="tab-button active" data-tab="cards" onclick="switchResultTab('cards')">
+                                分类视图
+                            </button>
+                            <button class="tab-button" data-tab="table" onclick="switchResultTab('table')">
+                                表格视图
+                            </button>
+                        </div>
+                        
+                        <!-- 分类视图 -->
+                        <div class="tab-content active" id="cards-tab" style="display: none;">
+                            <div class="extraction-grid">
+                                <!-- 电话号码 -->
+                                <div class="extraction-card">
+                                    <div class="card-header">
+                                        <div class="card-icon contact">
+                                            <i class="fas fa-phone"></i>
+                                        </div>
+                                        <div class="card-title">电话号码</div>
+                                        <div class="card-count">找到 5 个</div>
+                                    </div>
+                                    <div class="extracted-items">
+                                        <div class="extracted-item">
+                                            <div class="item-content">
+                                                <div class="item-value">138-0013-8000</div>
+                                                <div class="item-context">联系人：张经理</div>
+                                            </div>
+                                            <div class="item-confidence">
+                                                <div class="confidence-bar">
+                                                    <div class="confidence-fill high" style="width: 95%"></div>
+                                                </div>
+                                                <span class="confidence-text">95%</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="extracted-item">
+                                            <div class="item-content">
+                                                <div class="item-value">010-6888-9999</div>
+                                                <div class="item-context">公司总机</div>
+                                            </div>
+                                            <div class="item-confidence">
+                                                <div class="confidence-bar">
+                                                    <div class="confidence-fill high" style="width: 92%"></div>
+                                                </div>
+                                                <span class="confidence-text">92%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 邮箱地址 -->
+                                <div class="extraction-card">
+                                    <div class="card-header">
+                                        <div class="card-icon contact">
+                                            <i class="fas fa-envelope"></i>
+                                        </div>
+                                        <div class="card-title">邮箱地址</div>
+                                        <div class="card-count">找到 3 个</div>
+                                    </div>
+                                    <div class="extracted-items">
+                                        <div class="extracted-item">
+                                            <div class="item-content">
+                                                <div class="item-value">contact@company.com</div>
+                                                <div class="item-context">企业邮箱</div>
+                                            </div>
+                                            <div class="item-confidence">
+                                                <div class="confidence-bar">
+                                                    <div class="confidence-fill high" style="width: 98%"></div>
+                                                </div>
+                                                <span class="confidence-text">98%</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="extracted-item">
+                                            <div class="item-content">
+                                                <div class="item-value">zhang.manager@company.com</div>
+                                                <div class="item-context">个人邮箱</div>
+                                            </div>
+                                            <div class="item-confidence">
+                                                <div class="confidence-bar">
+                                                    <div class="confidence-fill high" style="width: 96%"></div>
+                                                </div>
+                                                <span class="confidence-text">96%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 日期时间 -->
+                                <div class="extraction-card">
+                                    <div class="card-header">
+                                        <div class="card-icon date">
+                                            <i class="fas fa-calendar"></i>
+                                        </div>
+                                        <div class="card-title">日期时间</div>
+                                        <div class="card-count">找到 8 个</div>
+                                    </div>
+                                    <div class="extracted-items">
+                                        <div class="extracted-item">
+                                            <div class="item-content">
+                                                <div class="item-value">2025年5月29日</div>
+                                                <div class="item-context">合同签署日期</div>
+                                            </div>
+                                            <div class="item-confidence">
+                                                <div class="confidence-bar">
+                                                    <div class="confidence-fill high" style="width: 94%"></div>
+                                                </div>
+                                                <span class="confidence-text">94%</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="extracted-item">
+                                            <div class="item-content">
+                                                <div class="item-value">2025-06-15</div>
+                                                <div class="item-context">交付截止日期</div>
+                                            </div>
+                                            <div class="item-confidence">
+                                                <div class="confidence-bar">
+                                                    <div class="confidence-fill medium" style="width: 87%"></div>
+                                                </div>
+                                                <span class="confidence-text">87%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 金额数字 -->
+                                <div class="extraction-card">
+                                    <div class="card-header">
+                                        <div class="card-icon money">
+                                            <i class="fas fa-dollar-sign"></i>
+                                        </div>
+                                        <div class="card-title">金额数字</div>
+                                        <div class="card-count">找到 4 个</div>
+                                    </div>
+                                    <div class="extracted-items">
+                                        <div class="extracted-item">
+                                            <div class="item-content">
+                                                <div class="item-value">￥500,000</div>
+                                                <div class="item-context">合同总金额</div>
+                                            </div>
+                                            <div class="item-confidence">
+                                                <div class="confidence-bar">
+                                                    <div class="confidence-fill high" style="width: 99%"></div>
+                                                </div>
+                                                <span class="confidence-text">99%</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="extracted-item">
+                                            <div class="item-content">
+                                                <div class="item-value">￥50,000</div>
+                                                <div class="item-context">首付款</div>
+                                            </div>
+                                            <div class="item-confidence">
+                                                <div class="confidence-bar">
+                                                    <div class="confidence-fill high" style="width: 91%"></div>
+                                                </div>
+                                                <span class="confidence-text">91%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 人名 -->
+                                <div class="extraction-card">
+                                    <div class="card-header">
+                                        <div class="card-icon organization">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                        <div class="card-title">人名</div>
+                                        <div class="card-count">找到 6 个</div>
+                                    </div>
+                                    <div class="extracted-items">
+                                        <div class="extracted-item">
+                                            <div class="item-content">
+                                                <div class="item-value">张小明</div>
+                                                <div class="item-context">项目经理</div>
+                                            </div>
+                                            <div class="item-confidence">
+                                                <div class="confidence-bar">
+                                                    <div class="confidence-fill high" style="width: 93%"></div>
+                                                </div>
+                                                <span class="confidence-text">93%</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="extracted-item">
+                                            <div class="item-content">
+                                                <div class="item-value">李小红</div>
+                                                <div class="item-context">技术负责人</div>
+                                            </div>
+                                            <div class="item-confidence">
+                                                <div class="confidence-bar">
+                                                    <div class="confidence-fill medium" style="width: 85%"></div>
+                                                </div>
+                                                <span class="confidence-text">85%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 组织机构 -->
+                                <div class="extraction-card">
+                                    <div class="card-header">
+                                        <div class="card-icon organization">
+                                            <i class="fas fa-building"></i>
+                                        </div>
+                                        <div class="card-title">组织机构</div>
+                                        <div class="card-count">找到 3 个</div>
+                                    </div>
+                                    <div class="extracted-items">
+                                        <div class="extracted-item">
+                                            <div class="item-content">
+                                                <div class="item-value">智能科技有限公司</div>
+                                                <div class="item-context">甲方公司</div>
+                                            </div>
+                                            <div class="item-confidence">
+                                                <div class="confidence-bar">
+                                                    <div class="confidence-fill high" style="width: 97%"></div>
+                                                </div>
+                                                <span class="confidence-text">97%</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="extracted-item">
+                                            <div class="item-content">
+                                                <div class="item-value">研发部</div>
+                                                <div class="item-context">执行部门</div>
+                                            </div>
+                                            <div class="item-confidence">
+                                                <div class="confidence-bar">
+                                                    <div class="confidence-fill medium" style="width: 82%"></div>
+                                                </div>
+                                                <span class="confidence-text">82%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 表格视图 -->
+                        <div class="tab-content" id="table-tab" style="display: none;">
+                            <div class="table-view">
+                                <table class="extraction-table">
+                                    <thead>
+                                        <tr>
+                                            <th>类型</th>
+                                            <th>提取内容</th>
+                                            <th>上下文</th>
+                                            <th>置信度</th>
+                                            <th>位置</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>电话号码</td>
+                                            <td>138-0013-8000</td>
+                                            <td>联系人：张经理</td>
+                                            <td>95%</td>
+                                            <td>第1页</td>
+                                        </tr>
+                                        <tr>
+                                            <td>邮箱地址</td>
+                                            <td>contact@company.com</td>
+                                            <td>企业邮箱</td>
+                                            <td>98%</td>
+                                            <td>第1页</td>
+                                        </tr>
+                                        <tr>
+                                            <td>金额数字</td>
+                                            <td>￥500,000</td>
+                                            <td>合同总金额</td>
+                                            <td>99%</td>
+                                            <td>第2页</td>
+                                        </tr>
+                                        <tr>
+                                            <td>日期时间</td>
+                                            <td>2025年5月29日</td>
+                                            <td>合同签署日期</td>
+                                            <td>94%</td>
+                                            <td>第2页</td>
+                                        </tr>
+                                        <tr>
+                                            <td>组织机构</td>
+                                            <td>智能科技有限公司</td>
+                                            <td>甲方公司</td>
+                                            <td>97%</td>
+                                            <td>第1页</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- 导出选项 -->
+                        <div class="export-options" style="display: none;" id="export-options">
+                            <button class="btn btn-secondary" onclick="exportResults('json')">
+                                <i class="fas fa-code"></i>
+                                导出JSON
+                            </button>
+                            <button class="btn btn-secondary" onclick="exportResults('csv')">
+                                <i class="fas fa-table"></i>
+                                导出CSV
+                            </button>
+                            <button class="btn btn-secondary" onclick="exportResults('excel')">
+                                <i class="fas fa-file-excel"></i>
+                                导出Excel
+                            </button>
+                            <button class="btn btn-primary" onclick="saveToKnowledgeBase()">
+                                <i class="fas fa-database"></i>
+                                保存到知识库
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 底部操作栏 -->
+                <div class="action-bar">
+                    <div class="status-info">
+                        <span id="file-count">0 个文件</span>
+                        <span id="selected-types">5 种类型</span>
+                        <span id="extraction-status">准备就绪</span>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button class="btn btn-secondary" onclick="resetExtraction()">
+                            <i class="fas fa-undo"></i>
+                            重置
+                        </button>
+                        <button class="btn btn-primary" id="start-extraction" onclick="startExtraction()" disabled>
+                            <i class="fas fa-search"></i>
+                            开始提取
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let uploadedFiles = [];
+    let selectedTypes = ['phone', 'email', 'date', 'money', 'person', 'organization'];
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeUpload();
+        updateSelectedTypes();
+    });
+    
+    function initializeUpload() {
+        const uploadZone = document.getElementById('upload-zone');
+        const fileInput = document.getElementById('file-input');
+        
+        uploadZone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', handleFileSelect);
+        
+        // 拖拽功能
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+        
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+        
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            const files = Array.from(e.dataTransfer.files);
+            handleFiles(files);
+        });
+    }
+    
+    function handleFileSelect(e) {
+        const files = Array.from(e.target.files);
+        handleFiles(files);
+    }
+    
+    function handleFiles(files) {
+        files.forEach(file => {
+            if (isValidFile(file)) {
+                uploadedFiles.push(file);
+                addFileToList(file);
+            }
+        });
+        
+        updateFileCount();
+        updateExtractionButton();
+    }
+    
+    function isValidFile(file) {
+        const validTypes = [
+            'application/pdf',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/vnd.ms-excel',
+            'image/jpeg',
+            'image/png',
+            'text/plain'
+        ];
+        
+        const maxSize = 50 * 1024 * 1024; // 50MB
+        return validTypes.includes(file.type) && file.size <= maxSize;
+    }
+    
+    function addFileToList(file) {
+        const fileList = document.getElementById('file-list');
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+        fileItem.innerHTML = `
+            <div class="file-info">
+                <div class="file-icon">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <div class="file-details">
+                    <div class="file-name">${file.name}</div>
+                    <div class="file-meta">${formatFileSize(file.size)} • ${getFileType(file.type)}</div>
+                </div>
+            </div>
+            <div class="file-actions">
+                <button class="file-action remove" onclick="removeFile('${file.name}')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+        
+        fileList.appendChild(fileItem);
+    }
+    
+    function removeFile(fileName) {
+        uploadedFiles = uploadedFiles.filter(file => file.name !== fileName);
+        
+        const fileItems = document.querySelectorAll('.file-item');
+        fileItems.forEach(item => {
+            if (item.querySelector('.file-name').textContent === fileName) {
+                item.remove();
+            }
+        });
+        
+        updateFileCount();
+        updateExtractionButton();
+    }
+    
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+    
+    function getFileType(mimeType) {
+        const types = {
+            'application/pdf': 'PDF',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'Word',
+            'application/msword': 'Word',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'Excel',
+            'application/vnd.ms-excel': 'Excel',
+            'image/jpeg': 'JPEG',
+            'image/png': 'PNG',
+            'text/plain': 'TXT'
+        };
+        return types[mimeType] || '未知';
+    }
+    
+    function toggleType(type) {
+        const typeItem = document.querySelector(`[data-type="${type}"]`);
+        const checkbox = typeItem.querySelector('.type-checkbox');
+        
+        if (selectedTypes.includes(type)) {
+            selectedTypes = selectedTypes.filter(t => t !== type);
+            typeItem.classList.remove('active');
+            checkbox.checked = false;
+        } else {
+            selectedTypes.push(type);
+            typeItem.classList.add('active');
+            checkbox.checked = true;
+        }
+        
+        updateSelectedTypes();
+    }
+    
+    function updateSelectedTypes() {
+        document.getElementById('selected-types').textContent = `${selectedTypes.length} 种类型`;
+    }
+    
+    function updateFileCount() {
+        document.getElementById('file-count').textContent = `${uploadedFiles.length} 个文件`;
+    }
+    
+    function updateExtractionButton() {
+        const btn = document.getElementById('start-extraction');
+        btn.disabled = uploadedFiles.length === 0 || selectedTypes.length === 0;
+    }
+    
+    function startExtraction() {
+        if (uploadedFiles.length === 0) {
+            alert('请先上传文档文件');
+            return;
+        }
+        
+        if (selectedTypes.length === 0) {
+            alert('请选择要提取的信息类型');
+            return;
+        }
+        
+        // 显示结果区域
+        const resultsSection = document.getElementById('results-section');
+        const progressSection = document.getElementById('extraction-progress');
+        const tabsSection = document.getElementById('results-tabs');
+        const cardsTab = document.getElementById('cards-tab');
+        const exportOptions = document.getElementById('export-options');
+        
+        resultsSection.classList.add('show');
+        progressSection.style.display = 'block';
+        tabsSection.style.display = 'none';
+        cardsTab.style.display = 'none';
+        exportOptions.style.display = 'none';
+        
+        // 更新状态
+        document.getElementById('extraction-status').textContent = '正在提取...';
+        
+        // 模拟提取进度
+        let progress = 0;
+        const progressBar = document.querySelector('.progress-fill');
+        const progressText = document.querySelector('.progress-percentage');
+        
+        const interval = setInterval(() => {
+            progress += Math.random() * 12;
+            if (progress >= 100) {
+                progress = 100;
+                clearInterval(interval);
+                showResults();
+            }
+            
+            progressBar.style.width = progress + '%';
+            progressText.textContent = Math.round(progress) + '%';
+        }, 400);
+    }
+    
+    function showResults() {
+        // 隐藏进度条，显示结果
+        document.getElementById('extraction-progress').style.display = 'none';
+        document.getElementById('results-tabs').style.display = 'flex';
+        document.getElementById('cards-tab').style.display = 'block';
+        document.getElementById('export-options').style.display = 'flex';
+        document.getElementById('extraction-status').textContent = '提取完成';
+    }
+    
+    function switchResultTab(tabName) {
+        // 更新tab按钮状态
+        document.querySelectorAll('.tab-button').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+        
+        // 更新tab内容
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.style.display = 'none';
+        });
+        document.getElementById(`${tabName}-tab`).style.display = 'block';
+    }
+    
+    function exportResults(format) {
+        alert(`正在导出${format.toUpperCase()}格式的提取结果...`);
+    }
+    
+    function saveToKnowledgeBase() {
+        alert('正在保存提取结果到知识库...');
+    }
+    
+    function resetExtraction() {
+        uploadedFiles = [];
+        document.getElementById('file-list').innerHTML = '';
+        document.getElementById('results-section').classList.remove('show');
+        document.getElementById('extraction-status').textContent = '准备就绪';
+        document.getElementById('file-input').value = '';
+        
+        updateFileCount();
+        updateExtractionButton();
+    }
+</script>
+{% endblock %}

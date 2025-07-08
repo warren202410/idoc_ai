@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- 圆形背景 -->
+    <circle cx="18" cy="18" r="18" fill="#4A6CF7"/>
+    
+    <!-- 文档图标 -->
+    <path d="M24 10H12C10.8954 10 10 10.8954 10 12V24C10 25.1046 10.8954 26 12 26H24C25.1046 26 26 25.1046 26 24V12C26 10.8954 25.1046 10 24 10Z" fill="white"/>
+    
+    <!-- 文档线条 -->
+    <path d="M14 16H22" stroke="#4A6CF7" stroke-width="2" stroke-linecap="round"/>
+    <path d="M14 19H22" stroke="#4A6CF7" stroke-width="2" stroke-linecap="round"/>
+    <path d="M14 22H18" stroke="#4A6CF7" stroke-width="2" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,1229 @@
+{% extends "base.html" %}
+
+{% block title %}内容分析 - iDOC{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<style>
+    body {
+        background-color: #f8fafc;
+        min-height: 100vh;
+        font-family: 'Inter', sans-serif;
+    }
+    
+    .analysis-layout {
+        display: flex;
+        height: calc(100vh - 1rem);
+        gap: 0;
+    }
+    
+    .analysis-sidebar {
+        width: 320px;
+        background: white;
+        border-right: 1px solid #e2e8f0;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    
+    .analysis-main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background-color: #f8fafc;
+    }
+    
+    .sidebar-header {
+        padding: 2rem 1.5rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .sidebar-title {
+        font-size: 1.375rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+    }
+    
+    .sidebar-subtitle {
+        color: #64748b;
+        font-size: 0.85rem;
+        line-height: 1.5;
+    }
+    
+    .analysis-options {
+        flex: 1;
+        padding: 1.5rem;
+        overflow-y: auto;
+    }
+    
+    .option-section {
+        margin-bottom: 2rem;
+    }
+    
+    .option-title {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    .option-card {
+        background: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .option-card:hover {
+        border-color: #4f46e5;
+        box-shadow: 0 2px 8px rgba(79, 70, 229, 0.1);
+    }
+    
+    .option-card.active {
+        border-color: #4f46e5;
+        background-color: #f8fafc;
+    }
+    
+    .option-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    
+    .option-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        background-color: #4f46e5;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.875rem;
+        margin-right: 0.75rem;
+    }
+    
+    .option-name {
+        font-weight: 600;
+        color: #1e293b;
+        font-size: 0.9rem;
+    }
+    
+    .option-desc {
+        color: #64748b;
+        font-size: 0.8rem;
+        line-height: 1.4;
+    }
+    
+    .main-header {
+        background: white;
+        padding: 2rem;
+        border-bottom: 1px solid #e2e8f0;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    
+    .main-title {
+        font-size: 1.875rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0;
+    }
+    
+    .main-subtitle {
+        color: #64748b;
+        font-size: 1rem;
+        margin-top: 0.5rem;
+    }
+    
+    .content-area {
+        flex: 1;
+        padding: 2rem;
+        overflow-y: auto;
+    }
+    
+    .upload-section {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .section-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        background-color: #4f46e5;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+    }
+    
+    .upload-zone {
+        border: 2px dashed #cbd5e1;
+        border-radius: 8px;
+        padding: 3rem 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: #fafafa;
+        margin-bottom: 1.5rem;
+    }
+    
+    .upload-zone:hover {
+        border-color: #4f46e5;
+        background: #f8fafc;
+    }
+    
+    .upload-zone.dragover {
+        border-color: #4f46e5;
+        background: #f1f5f9;
+        transform: scale(1.02);
+    }
+    
+    .upload-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 12px;
+        background-color: #4f46e5;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin: 0 auto 1.5rem;
+    }
+    
+    .upload-text {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+    }
+    
+    .upload-hint {
+        color: #64748b;
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .file-types {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .file-type {
+        padding: 0.25rem 0.75rem;
+        background: #f1f5f9;
+        color: #64748b;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .analysis-config {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    .config-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+    }
+    
+    .config-group {
+        background: #f8fafc;
+        padding: 1.5rem;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+    }
+    
+    .group-title {
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #1e293b;
+        font-size: 1rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+    
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #374151;
+        font-size: 0.9rem;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        transition: border-color 0.2s ease;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+    
+    .form-check {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.75rem;
+        padding: 0.5rem;
+        background: white;
+        border-radius: 4px;
+        transition: background-color 0.2s ease;
+    }
+    
+    .form-check:hover {
+        background: #f9fafb;
+    }
+    
+    .form-check-input {
+        margin-right: 0.5rem;
+    }
+    
+    .form-check-label {
+        color: #374151;
+        font-size: 0.85rem;
+        cursor: pointer;
+        flex: 1;
+    }
+    
+    .results-section {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        display: none;
+    }
+    
+    .results-section.show {
+        display: block;
+    }
+    
+    .analysis-progress {
+        margin-bottom: 2rem;
+    }
+    
+    .progress-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    
+    .progress-text {
+        font-size: 0.9rem;
+        color: #64748b;
+    }
+    
+    .progress-percentage {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #1e293b;
+    }
+    
+    .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: #e5e7eb;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        border-radius: 4px;
+        transition: width 0.3s ease;
+    }
+    
+    .results-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .result-card {
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 1.5rem;
+        border: 1px solid #e2e8f0;
+    }
+    
+    .result-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .result-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        margin-right: 1rem;
+        color: white;
+    }
+    
+    .result-icon.sentiment { background: linear-gradient(135deg, #10b981, #059669); }
+    .result-icon.topic { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+    .result-icon.entity { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .result-icon.keywords { background: linear-gradient(135deg, #ef4444, #dc2626); }
+    
+    .result-title {
+        font-weight: 600;
+        color: #1e293b;
+        font-size: 1rem;
+    }
+    
+    .result-content {
+        color: #64748b;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+    
+    .sentiment-score {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .score-bar {
+        flex: 1;
+        height: 8px;
+        background: #e5e7eb;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    
+    .score-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.3s ease;
+    }
+    
+    .score-fill.positive {
+        background: linear-gradient(135deg, #10b981, #059669);
+    }
+    
+    .score-fill.neutral {
+        background: linear-gradient(135deg, #6b7280, #4b5563);
+    }
+    
+    .score-fill.negative {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+    }
+    
+    .score-value {
+        font-weight: 600;
+        color: #1e293b;
+        min-width: 60px;
+    }
+    
+    .keyword-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+    
+    .keyword-tag {
+        padding: 0.25rem 0.75rem;
+        background: white;
+        color: #4f46e5;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .entity-list {
+        margin-top: 1rem;
+    }
+    
+    .entity-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    
+    .entity-item:last-child {
+        border-bottom: none;
+    }
+    
+    .entity-name {
+        font-weight: 500;
+        color: #1e293b;
+    }
+    
+    .entity-type {
+        padding: 0.125rem 0.5rem;
+        background: #f1f5f9;
+        color: #64748b;
+        border-radius: 8px;
+        font-size: 0.7rem;
+        font-weight: 500;
+        text-transform: uppercase;
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .btn-primary {
+        background-color: #4f46e5;
+        color: white;
+        border: 1px solid #4f46e5;
+    }
+    
+    .btn-primary:hover {
+        background-color: #4338ca;
+        border-color: #4338ca;
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-secondary {
+        background-color: white;
+        color: #374151;
+        border: 1px solid #d1d5db;
+    }
+    
+    .btn-secondary:hover {
+        background-color: #f9fafb;
+        border-color: #9ca3af;
+        color: #374151;
+        text-decoration: none;
+    }
+    
+    .action-bar {
+        background: white;
+        padding: 1.5rem 2rem;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.05);
+    }
+    
+    .status-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+    
+    .btn-group {
+        display: flex;
+        gap: 0.75rem;
+    }
+    
+    @media (max-width: 1024px) {
+        .analysis-layout {
+            flex-direction: column;
+            height: auto;
+        }
+        
+        .analysis-sidebar {
+            width: auto;
+            border-right: none;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .analysis-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+        }
+        
+        .option-section {
+            margin-bottom: 0;
+        }
+        
+        .config-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .results-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <!-- 左侧导航栏 -->
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <a href="{{ url_for('dashboard') }}">
+                <div class="sidebar-brand-icon">
+                    <img src="{{ url_for('static', filename='img/logo-icon.svg') }}" alt="Logo Icon" onerror="this.src='{{ url_for('static', filename='img/default-logo.png') }}'">
+                </div>
+                <div class="sidebar-brand-text">
+                    <img src="{{ url_for('static', filename='img/logo-text.svg') }}" alt="Logo Text" onerror="this.src='{{ url_for('static', filename='img/default-logo-text.png') }}'">
+                    <span>iDOC</span>
+                </div>
+            </a>
+        </div>
+        
+        <!-- 导航菜单 -->
+        <div class="sidebar-nav">
+            <a href="{{ url_for('dashboard') }}" class="nav-item">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>仪表板</span>
+            </a>
+            
+            <div class="nav-item" data-bs-toggle="collapse" data-bs-target="#collapseKnowledgeBase" aria-expanded="false">
+                <i class="fas fa-book"></i>
+                <span>企业知识库</span>
+                <i class="fas fa-chevron-down ms-auto"></i>
+            </div>
+            <div class="collapse" id="collapseKnowledgeBase">
+                <a href="{{ url_for('knowledge_base') }}" class="nav-item ms-4 py-2">
+                    <i class="fas fa-folder-open"></i>
+                    <span>所有知识库</span>
+                </a>
+                <a href="{{ url_for('knowledge_base') }}?action=import" class="nav-item ms-4 py-2">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <span>导入知识</span>
+                </a>
+                <a href="{{ url_for('knowledge_base') }}?action=settings" class="nav-item ms-4 py-2">
+                    <i class="fas fa-cogs"></i>
+                    <span>知识库设置</span>
+                </a>
+            </div>
+            
+            <div class="nav-item" data-bs-toggle="collapse" data-bs-target="#collapseDocuments" aria-expanded="false">
+                <i class="fas fa-file-alt"></i>
+                <span>文档管理</span>
+                <i class="fas fa-chevron-down ms-auto"></i>
+            </div>
+            <div class="collapse" id="collapseDocuments">
+                <a href="{{ url_for('documents_list') }}" class="nav-item ms-4 py-2">
+                    <i class="fas fa-list"></i>
+                    <span>所有文档</span>
+                </a>
+                <a href="{{ url_for('documents_list') }}?action=upload" class="nav-item ms-4 py-2">
+                    <i class="fas fa-upload"></i>
+                    <span>上传文档</span>
+                </a>
+                <a href="{{ url_for('documents_list') }}?action=recent" class="nav-item ms-4 py-2">
+                    <i class="fas fa-clock"></i>
+                    <span>最近文档</span>
+                </a>
+                <a href="{{ url_for('documents_list') }}?action=starred" class="nav-item ms-4 py-2">
+                    <i class="fas fa-star"></i>
+                    <span>星标文档</span>
+                </a>
+            </div>
+            
+            <div class="nav-item" data-bs-toggle="collapse" data-bs-target="#collapseWorkflow" aria-expanded="false">
+                <i class="fas fa-project-diagram"></i>
+                <span>智能流程设计</span>
+                <i class="fas fa-chevron-down ms-auto"></i>
+            </div>
+            <div class="collapse" id="collapseWorkflow">
+                <a href="{{ url_for('workflow_create') }}" class="nav-item ms-4 py-2">
+                    <i class="fas fa-plus"></i>
+                    <span>创建智能流程</span>
+                </a>
+                <a href="{{ url_for('workflow_create') }}?action=templates" class="nav-item ms-4 py-2">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>流程模板库</span>
+                </a>
+                <a href="{{ url_for('workflow_create') }}?action=running" class="nav-item ms-4 py-2">
+                    <i class="fas fa-play-circle"></i>
+                    <span>运行中流程</span>
+                </a>
+                <a href="{{ url_for('workflow_create') }}?action=history" class="nav-item ms-4 py-2">
+                    <i class="fas fa-history"></i>
+                    <span>流程执行历史</span>
+                </a>
+            </div>
+            
+            <div class="nav-item" data-bs-toggle="collapse" data-bs-target="#collapseAnalysis" aria-expanded="true">
+                <i class="fas fa-chart-bar"></i>
+                <span>AI分析</span>
+                <i class="fas fa-chevron-down ms-auto"></i>
+            </div>
+            <div class="collapse show" id="collapseAnalysis">
+                <a href="{{ url_for('ai_analysis') }}" class="nav-item ms-4 py-2 active">
+                    <i class="fas fa-search"></i>
+                    <span>内容分析</span>
+                </a>
+                <a href="{{ url_for('ai_analysis') }}?action=compare" class="nav-item ms-4 py-2">
+                    <i class="fas fa-not-equal"></i>
+                    <span>文档对比</span>
+                </a>
+                <a href="{{ url_for('ai_analysis') }}?action=extract" class="nav-item ms-4 py-2">
+                    <i class="fas fa-filter"></i>
+                    <span>信息提取</span>
+                </a>
+                <a href="{{ url_for('ai_analysis') }}?action=summary" class="nav-item ms-4 py-2">
+                    <i class="fas fa-compress-alt"></i>
+                    <span>文档摘要</span>
+                </a>
+            </div>
+            
+            <div class="nav-item" data-bs-toggle="collapse" data-bs-target="#collapseAgent" aria-expanded="false">
+                <i class="fas fa-robot"></i>
+                <span>Agent Chat</span>
+                <i class="fas fa-chevron-down ms-auto"></i>
+            </div>
+            <div class="collapse" id="collapseAgent">
+                <a href="{{ url_for('agent_chat') }}" class="nav-item ms-4 py-2">
+                    <i class="fas fa-comments"></i>
+                    <span>新会话</span>
+                </a>
+                <a href="{{ url_for('agent_chat_history') }}" class="nav-item ms-4 py-2">
+                    <i class="fas fa-history"></i>
+                    <span>聊天历史</span>
+                </a>
+                <a href="{{ url_for('multi_agent_workshop') }}" class="nav-item ms-4 py-2">
+                    <i class="fas fa-users-cog"></i>
+                    <span>多Agent协作</span>
+                </a>
+                <a href="{{ url_for('agent_settings') }}" class="nav-item ms-4 py-2">
+                    <i class="fas fa-sliders-h"></i>
+                    <span>Agent设置</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">用户</div>
+            
+            <a href="{{ url_for('account_settings') }}" class="nav-item">
+                <i class="fas fa-user-cog"></i>
+                <span>账户设置</span>
+            </a>
+            
+            <a href="{{ url_for('notifications') }}" class="nav-item">
+                <i class="fas fa-bell"></i>
+                <span>通知</span>
+                <span class="badge rounded-pill bg-primary ms-auto">3</span>
+            </a>
+            
+            <a href="{{ url_for('logout') }}" class="nav-item">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>退出登录</span>
+            </a>
+        </div>
+    </div>
+    
+    <!-- 主要内容分析界面 -->
+    <div class="main-content">
+        <div class="analysis-layout">
+            <!-- 左侧分析选项 -->
+            <div class="analysis-sidebar">
+                <div class="sidebar-header">
+                    <h2 class="sidebar-title">分析选项</h2>
+                    <p class="sidebar-subtitle">选择您需要的AI分析功能类型</p>
+                </div>
+                
+                <div class="analysis-options">
+                    <div class="option-section">
+                        <div class="option-title">内容理解</div>
+                        
+                        <div class="option-card active" data-option="sentiment" onclick="selectOption('sentiment')">
+                            <div class="option-header">
+                                <div class="option-icon">
+                                    <i class="fas fa-heart"></i>
+                                </div>
+                                <div class="option-name">情感分析</div>
+                            </div>
+                            <div class="option-desc">分析文档的情感倾向和语调</div>
+                        </div>
+                        
+                        <div class="option-card" data-option="topic" onclick="selectOption('topic')">
+                            <div class="option-header">
+                                <div class="option-icon">
+                                    <i class="fas fa-tags"></i>
+                                </div>
+                                <div class="option-name">主题识别</div>
+                            </div>
+                            <div class="option-desc">自动识别文档的核心主题</div>
+                        </div>
+                        
+                        <div class="option-card" data-option="entity" onclick="selectOption('entity')">
+                            <div class="option-header">
+                                <div class="option-icon">
+                                    <i class="fas fa-user-tag"></i>
+                                </div>
+                                <div class="option-name">实体识别</div>
+                            </div>
+                            <div class="option-desc">提取人名、地名、组织等实体</div>
+                        </div>
+                    </div>
+                    
+                    <div class="option-section">
+                        <div class="option-title">关键信息</div>
+                        
+                        <div class="option-card" data-option="keywords" onclick="selectOption('keywords')">
+                            <div class="option-header">
+                                <div class="option-icon">
+                                    <i class="fas fa-key"></i>
+                                </div>
+                                <div class="option-name">关键词提取</div>
+                            </div>
+                            <div class="option-desc">提取文档的重要关键词</div>
+                        </div>
+                        
+                        <div class="option-card" data-option="summary" onclick="selectOption('summary')">
+                            <div class="option-header">
+                                <div class="option-icon">
+                                    <i class="fas fa-compress-alt"></i>
+                                </div>
+                                <div class="option-name">内容摘要</div>
+                            </div>
+                            <div class="option-desc">生成简洁的内容摘要</div>
+                        </div>
+                        
+                        <div class="option-card" data-option="structure" onclick="selectOption('structure')">
+                            <div class="option-header">
+                                <div class="option-icon">
+                                    <i class="fas fa-sitemap"></i>
+                                </div>
+                                <div class="option-name">结构分析</div>
+                            </div>
+                            <div class="option-desc">分析文档的结构和层次</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 右侧操作区域 -->
+            <div class="analysis-main">
+                <div class="main-header">
+                    <h1 class="main-title">智能内容分析</h1>
+                    <p class="main-subtitle">使用先进的AI技术深度分析文档内容，提取有价值的信息和洞察</p>
+                </div>
+                
+                <div class="content-area">
+                    <!-- 文档上传区域 -->
+                    <div class="upload-section">
+                        <h3 class="section-title">
+                            <div class="section-icon">
+                                <i class="fas fa-cloud-upload"></i>
+                            </div>
+                            上传文档
+                        </h3>
+                        
+                        <div class="upload-zone" id="upload-zone">
+                            <div class="upload-icon">
+                                <i class="fas fa-file-upload"></i>
+                            </div>
+                            <div class="upload-text">拖拽文件到此处或点击选择</div>
+                            <div class="upload-hint">支持多种文档格式，最大文件大小 50MB</div>
+                            <div class="file-types">
+                                <span class="file-type">PDF</span>
+                                <span class="file-type">Word</span>
+                                <span class="file-type">TXT</span>
+                                <span class="file-type">RTF</span>
+                                <span class="file-type">HTML</span>
+                            </div>
+                            <input type="file" id="file-input" multiple accept=".pdf,.doc,.docx,.txt,.rtf,.html" style="display: none;">
+                        </div>
+                    </div>
+                    
+                    <!-- 分析配置 -->
+                    <div class="analysis-config">
+                        <h3 class="section-title">
+                            <div class="section-icon">
+                                <i class="fas fa-cogs"></i>
+                            </div>
+                            分析配置
+                        </h3>
+                        
+                        <div class="config-grid">
+                            <div class="config-group">
+                                <div class="group-title">基础设置</div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">分析语言</label>
+                                    <select class="form-control" id="analysis-language">
+                                        <option value="auto">自动检测</option>
+                                        <option value="zh-CN" selected>简体中文</option>
+                                        <option value="en-US">English</option>
+                                        <option value="ja-JP">日本語</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">分析深度</label>
+                                    <select class="form-control" id="analysis-depth">
+                                        <option value="basic">基础分析</option>
+                                        <option value="standard" selected>标准分析</option>
+                                        <option value="deep">深度分析</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="config-group">
+                                <div class="group-title">输出选项</div>
+                                
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="save-results" checked>
+                                    <label class="form-check-label" for="save-results">
+                                        保存分析结果到知识库
+                                    </label>
+                                </div>
+                                
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="generate-report">
+                                    <label class="form-check-label" for="generate-report">
+                                        生成详细分析报告
+                                    </label>
+                                </div>
+                                
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="export-data">
+                                    <label class="form-check-label" for="export-data">
+                                        导出结构化数据
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 分析结果 -->
+                    <div class="results-section" id="results-section">
+                        <h3 class="section-title">
+                            <div class="section-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            分析结果
+                        </h3>
+                        
+                        <div class="analysis-progress" id="analysis-progress">
+                            <div class="progress-header">
+                                <span class="progress-text">正在分析文档内容...</span>
+                                <span class="progress-percentage">45%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 45%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="results-grid" id="results-grid" style="display: none;">
+                            <!-- 情感分析结果 -->
+                            <div class="result-card" id="sentiment-result">
+                                <div class="result-header">
+                                    <div class="result-icon sentiment">
+                                        <i class="fas fa-heart"></i>
+                                    </div>
+                                    <div class="result-title">情感分析</div>
+                                </div>
+                                <div class="result-content">
+                                    文档整体呈现积极正面的语调，表达了对未来发展的乐观态度。
+                                </div>
+                                <div class="sentiment-score">
+                                    <div class="score-bar">
+                                        <div class="score-fill positive" style="width: 78%"></div>
+                                    </div>
+                                    <div class="score-value">78% 积极</div>
+                                </div>
+                            </div>
+                            
+                            <!-- 主题识别结果 -->
+                            <div class="result-card" id="topic-result">
+                                <div class="result-header">
+                                    <div class="result-icon topic">
+                                        <i class="fas fa-tags"></i>
+                                    </div>
+                                    <div class="result-title">主题识别</div>
+                                </div>
+                                <div class="result-content">
+                                    识别出3个主要主题：企业发展战略、数字化转型、市场拓展计划。
+                                </div>
+                                <div class="keyword-list">
+                                    <span class="keyword-tag">企业发展</span>
+                                    <span class="keyword-tag">数字化转型</span>
+                                    <span class="keyword-tag">市场拓展</span>
+                                    <span class="keyword-tag">战略规划</span>
+                                </div>
+                            </div>
+                            
+                            <!-- 实体识别结果 -->
+                            <div class="result-card" id="entity-result">
+                                <div class="result-header">
+                                    <div class="result-icon entity">
+                                        <i class="fas fa-user-tag"></i>
+                                    </div>
+                                    <div class="result-title">实体识别</div>
+                                </div>
+                                <div class="result-content">
+                                    从文档中识别出重要的人名、组织和地点信息。
+                                </div>
+                                <div class="entity-list">
+                                    <div class="entity-item">
+                                        <span class="entity-name">张小明</span>
+                                        <span class="entity-type">人名</span>
+                                    </div>
+                                    <div class="entity-item">
+                                        <span class="entity-name">智能科技有限公司</span>
+                                        <span class="entity-type">组织</span>
+                                    </div>
+                                    <div class="entity-item">
+                                        <span class="entity-name">北京</span>
+                                        <span class="entity-type">地点</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 关键词提取结果 -->
+                            <div class="result-card" id="keywords-result">
+                                <div class="result-header">
+                                    <div class="result-icon keywords">
+                                        <i class="fas fa-key"></i>
+                                    </div>
+                                    <div class="result-title">关键词提取</div>
+                                </div>
+                                <div class="result-content">
+                                    提取出文档中最重要的关键词和短语。
+                                </div>
+                                <div class="keyword-list">
+                                    <span class="keyword-tag">人工智能</span>
+                                    <span class="keyword-tag">机器学习</span>
+                                    <span class="keyword-tag">数据分析</span>
+                                    <span class="keyword-tag">云计算</span>
+                                    <span class="keyword-tag">业务流程</span>
+                                    <span class="keyword-tag">自动化</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 底部操作栏 -->
+                <div class="action-bar">
+                    <div class="status-info">
+                        <span id="file-count">0 个文件</span>
+                        <span id="analysis-status">准备就绪</span>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button class="btn btn-secondary" onclick="resetAnalysis()">
+                            <i class="fas fa-undo"></i>
+                            重置
+                        </button>
+                        <button class="btn btn-primary" id="start-analysis" onclick="startAnalysis()" disabled>
+                            <i class="fas fa-play"></i>
+                            开始分析
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let uploadedFiles = [];
+    let currentOption = 'sentiment';
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeUpload();
+    });
+    
+    function initializeUpload() {
+        const uploadZone = document.getElementById('upload-zone');
+        const fileInput = document.getElementById('file-input');
+        
+        uploadZone.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        fileInput.addEventListener('change', handleFileSelect);
+        
+        // 拖拽功能
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+        
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+        
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            const files = Array.from(e.dataTransfer.files);
+            handleFiles(files);
+        });
+    }
+    
+    function handleFileSelect(e) {
+        const files = Array.from(e.target.files);
+        handleFiles(files);
+    }
+    
+    function handleFiles(files) {
+        uploadedFiles = files.filter(file => isValidFile(file));
+        updateFileCount();
+        updateAnalysisButton();
+    }
+    
+    function isValidFile(file) {
+        const validTypes = [
+            'application/pdf',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/msword',
+            'text/plain',
+            'application/rtf',
+            'text/html'
+        ];
+        
+        const maxSize = 50 * 1024 * 1024; // 50MB
+        return validTypes.includes(file.type) && file.size <= maxSize;
+    }
+    
+    function updateFileCount() {
+        document.getElementById('file-count').textContent = `${uploadedFiles.length} 个文件`;
+    }
+    
+    function updateAnalysisButton() {
+        const btn = document.getElementById('start-analysis');
+        btn.disabled = uploadedFiles.length === 0;
+    }
+    
+    function selectOption(option) {
+        // 更新选项状态
+        document.querySelectorAll('.option-card').forEach(card => {
+            card.classList.remove('active');
+        });
+        document.querySelector(`[data-option="${option}"]`).classList.add('active');
+        
+        currentOption = option;
+    }
+    
+    function startAnalysis() {
+        if (uploadedFiles.length === 0) {
+            alert('请先上传文档文件');
+            return;
+        }
+        
+        // 显示结果区域
+        const resultsSection = document.getElementById('results-section');
+        const progressSection = document.getElementById('analysis-progress');
+        const resultsGrid = document.getElementById('results-grid');
+        
+        resultsSection.classList.add('show');
+        progressSection.style.display = 'block';
+        resultsGrid.style.display = 'none';
+        
+        // 更新状态
+        document.getElementById('analysis-status').textContent = '正在分析...';
+        
+        // 模拟分析进度
+        let progress = 0;
+        const progressBar = document.querySelector('.progress-fill');
+        const progressText = document.querySelector('.progress-percentage');
+        
+        const interval = setInterval(() => {
+            progress += Math.random() * 15;
+            if (progress >= 100) {
+                progress = 100;
+                clearInterval(interval);
+                showResults();
+            }
+            
+            progressBar.style.width = progress + '%';
+            progressText.textContent = Math.round(progress) + '%';
+        }, 500);
+    }
+    
+    function showResults() {
+        // 隐藏进度条，显示结果
+        document.getElementById('analysis-progress').style.display = 'none';
+        document.getElementById('results-grid').style.display = 'grid';
+        document.getElementById('analysis-status').textContent = '分析完成';
+        
+        // 根据选择的选项显示对应结果
+        const allResults = document.querySelectorAll('.result-card');
+        allResults.forEach(card => card.style.display = 'none');
+        
+        if (currentOption === 'sentiment') {
+            document.getElementById('sentiment-result').style.display = 'block';
+        } else if (currentOption === 'topic') {
+            document.getElementById('topic-result').style.display = 'block';
+        } else if (currentOption === 'entity') {
+            document.getElementById('entity-result').style.display = 'block';
+        } else if (currentOption === 'keywords') {
+            document.getElementById('keywords-result').style.display = 'block';
+        } else {
+            // 显示所有结果
+            allResults.forEach(card => card.style.display = 'block');
+        }
+    }
+    
+    function resetAnalysis() {
+        uploadedFiles = [];
+        updateFileCount();
+        updateAnalysisButton();
+        
+        // 隐藏结果区域
+        document.getElementById('results-section').classList.remove('show');
+        document.getElementById('analysis-status').textContent = '准备就绪';
+        
+        // 重置文件输入
+        document.getElementById('file-input').value = '';
+    }
+</script>
+{% endblock %}
